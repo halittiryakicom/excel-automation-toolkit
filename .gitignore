@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# Build
+build/
+dist/
+*.spec
+
+# Logs
+*.log
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Test Cache
+.pytest_cache/
+
+# Output Files
+output/
+
+# Temporary Files
+*.tmp
+*.bak
+
+# Python Cache
+.cache/
+
+# Jupyter
+.ipynb_checkpoints/
