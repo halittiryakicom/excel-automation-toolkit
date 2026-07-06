@@ -1,4 +1,6 @@
 from src.excel_processor import ExcelProcessor
+from src.statistics import StatisticsEngine
+from pathlib import Path
 from PySide6.QtWidgets import (
     QMainWindow,
     QMessageBox,
@@ -114,7 +116,6 @@ class MainWindow(QMainWindow):
         self.progress_bar.setValue(value)
 
     def process_excel(self):
-        print("Processing Excel file...")
         if not self.file_path:
             QMessageBox.warning(
                 self,
@@ -122,47 +123,85 @@ class MainWindow(QMainWindow):
                 "Please select an Excel file first."
             )
             return
-        processor = ExcelProcessor()
 
-        self.set_progress(10)
-        self.log("Loading Excel file...")
-        processor.load_excel(self.file_path)
-        self.set_progress(30)
-        self.log("Excel loaded successfully.")
+        self.progress_bar.setValue(0)
+        self.log("Starting Excel processing...")
 
-        if self.remove_empty_rows_checkbox.isChecked():
-            self.log("Removing empty rows...")
-            processor.remove_empty_rows()
-            self.set_progress(50)
-            self.log("Empty rows removed.")
+        try:
+            processor = ExcelProcessor()
 
-        if self.remove_duplicate_rows_checkbox.isChecked():
-            self.log("Removing duplicate rows...")
-            processor.remove_duplicates()
-            self.set_progress(70)
-            self.log("Duplicate rows removed.")
+            # Load Excel
+            self.set_progress(10)
+            self.log("Loading Excel file...")
+            processor.load_excel(self.file_path)
+            self.set_progress(25)
+            self.log("Excel loaded successfully.")
 
-        from pathlib import Path
-        output_file = Path("output") / "cleaned_data.xlsx"
-        self.log("Saving Excel file...")
-        processor.save_excel(output_file)
-        self.set_progress(90)
-        self.log(f"Saved to: {output_file}")
+            # Remove Empty Rows
+            if self.remove_empty_rows_checkbox.isChecked():
+                self.log("Removing empty rows...")
+                processor.remove_empty_rows()
+                self.set_progress(45)
+                self.log("Empty rows removed.")
 
-        summary = processor.get_summary()
-        self.log("")
-        self.log("=== Summary ===")
-        self.log(f"Original Rows : {summary['original_rows']}")
-        self.log(f"Current Rows : {summary['current_rows']}")
-        self.log(f"Removed Empty Rows : {summary['removed_empty_rows']}")
-        self.log(f"Removed Duplicates : {summary['removed_duplicates']}")
+            # Remove Duplicate Rows
+            if self.remove_duplicate_rows_checkbox.isChecked():
+                self.log("Removing duplicate rows...")
+                processor.remove_duplicates()
+                self.set_progress(65)
+                self.log("Duplicate rows removed.")
 
-        self.set_progress(100)
-        self.log("Processing completed successfully.")
+            # Save File
+            output_file = Path(self.output_folder_edit.text()) / "cleaned_data.xlsx"
 
-        QMessageBox.information(
-            self,
-            "Completed",
-            "Excel file processed successfully!"
-        )
-        
+            self.log("Saving Excel file...")
+            processor.save_excel(output_file)
+            self.set_progress(80)
+            self.log(f"Saved to: {output_file}")
+
+            # Statistics
+            if self.generate_statistics_checkbox.isChecked():
+
+                self.log("")
+                self.log("========== PROCESS SUMMARY ==========")
+
+                stats = StatisticsEngine(processor.df)
+                stats_summary = stats.generate_summary()
+
+                processor_summary = processor.get_summary()
+
+                self.log(f"Original Rows      : {processor_summary['original_rows']}")
+                self.log(f"Current Rows       : {processor_summary['current_rows']}")
+                self.log(f"Removed Empty Rows : {processor_summary['removed_empty_rows']}")
+                self.log(f"Removed Duplicates : {processor_summary['removed_duplicates']}")
+
+                self.log("-------------------------------------")
+
+                self.log(f"Columns            : {stats_summary['columns']}")
+                self.log(f"Numeric Columns    : {stats_summary['numeric_columns']}")
+                self.log(f"Text Columns       : {stats_summary['text_columns']}")
+                self.log(f"Missing Cells      : {stats_summary['missing_cells']}")
+                self.log(f"Memory Usage       : {stats_summary['memory_usage']}")
+
+                self.log("=====================================")
+
+            self.set_progress(100)
+            self.log("Processing completed successfully.")
+
+            QMessageBox.information(
+                self,
+                "Completed",
+                "Excel file processed successfully!"
+            )
+
+        except Exception as e:
+
+            self.log("")
+            self.log("ERROR")
+            self.log(str(e))
+
+            QMessageBox.critical(
+                self,
+                "Error",
+                str(e)
+            )
