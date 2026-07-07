@@ -1,78 +1,122 @@
-![Python](https://img.shields.io/badge/Python-3.11-blue) ![PySide6](https://img.shields.io/badge/PySide6-GUI-green) ![License](https://img.shields.io/badge/License-MIT-yellow) ![Status](https://img.shields.io/badge/Status-Active-success) ![Platform](https://img.shields.io/badge/Platform-Windows-blueviolet)
+![Python](https://img.shields.io/badge/Python-3.11-blue)
+![PySide6](https://img.shields.io/badge/PySide6-GUI-green)
+![Pandas](https://img.shields.io/badge/Pandas-Data%20Processing-blue)
+![Matplotlib](https://img.shields.io/badge/Matplotlib-Charts-orange)
+![License](https://img.shields.io/badge/License-MIT-yellow)
+![Release](https://img.shields.io/github/v/release/halittiryakicom/excel-automation-toolkit)
+![Platform](https://img.shields.io/badge/Platform-Windows-blueviolet)
 
 # 📊 Excel Automation Toolkit
 
-A professional desktop application built with **Python** and **PySide6** for cleaning, processing and analyzing Excel files.
+A modern desktop application built with **Python** and **PySide6** for cleaning, processing, analyzing and visualizing Excel files.
 
-This project was developed as a portfolio application to demonstrate desktop application development, data processing and clean software architecture.
+The application provides automatic Excel cleaning, statistical analysis, chart generation and an intuitive desktop interface.
+
+This project was developed as part of my software engineering portfolio to demonstrate clean architecture, desktop application development and data automation using Python.
 
 ---
 
-## ✨ Features
+# ✨ Features
 
-### ✅ Excel Processing
+## 📂 Excel Processing
 
-- Load Excel (.xlsx, .xls) files
+- Load Excel (.xlsx / .xls) files
 - Remove empty rows
 - Remove duplicate rows
 - Save cleaned Excel files automatically
 
-### 📈 Statistics
+---
 
-- Total rows
+## 📈 Statistics Dashboard
+
+Generate useful information about your dataset.
+
+- Original rows
+- Current rows
+- Removed empty rows
+- Removed duplicate rows
 - Total columns
 - Numeric columns
 - Text columns
 - Missing cells
 - Memory usage
 
-### 🖥 User Interface
+---
 
-- Modern PySide6 interface
-- Progress bar
-- Processing log
-- Output folder selection
-- Modular architecture
+## 📊 Automatic Chart Generation
+
+Generate charts automatically after processing.
+
+Current charts include:
+
+- Missing Values Chart
+- Column Types Chart
+- Numeric Distribution Chart
+
+Charts are exported as PNG files.
 
 ---
 
-## 🛠 Technologies
+## 🖥 Modern Desktop Interface
+
+- PySide6 GUI
+- Statistics Panel
+- Processing Log
+- Progress Bar
+- Status Bar
+- About Dialog
+- Tooltips
+- Open Output Folder
+- Success Dialog
+
+---
+
+# 🛠 Technologies
 
 - Python 3.11+
 - PySide6
 - Pandas
 - OpenPyXL
+- Matplotlib
 
 ---
 
-## 📁 Project Structure
+# 📁 Project Structure
 
 ```text
 excel-automation-toolkit/
-│
+
 ├── app.py
 ├── requirements.txt
+├── LICENSE
 ├── README.md
 │
 ├── output/
+│   ├── cleaned_data.xlsx
+│   └── charts/
 │
 └── src/
-    ├── gui.py
-    ├── excel_processor.py
-    └── statistics.py
+    ├── core/
+    │   ├── excel_processor.py
+    │   ├── statistics.py
+    │   └── charts.py
+    │
+    └── gui/
+        ├── main_window.py
+        └── statistics_panel.py
 ```
 
 ---
 
-## 🚀 Installation
+# 🚀 Installation
 
 Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/excel-automation-toolkit.git
+git clone https://github.com/halittiryakicom/excel-automation-toolkit.git
 ```
 
-Go into the project
+Enter the project folder
 
 ```bash
 cd excel-automation-toolkit
@@ -92,14 +136,29 @@ python app.py
 
 ---
 
-## 📷 Screenshots
-### Main Window
-![alt text](screenshots/mainwindow.png)
-### Processing Result
-![alt text](screenshots/result.png)
+# 📷 Screenshots
+
+## Main Window
+
+![Main Window](screenshots/mainwindow.png)
+
 ---
 
-## 🔄 Workflow
+## Processing Result
+
+![Processing Result](screenshots/result.png)
+
+---
+
+## Generated Charts
+
+![alt text](output/charts/column_types.png)
+![alt text](output/charts/missing_values.png)
+![alt text](output/charts/numeric_distribution.png)
+
+---
+
+# 🔄 Workflow
 
 ```text
 Select Excel File
@@ -108,105 +167,100 @@ Select Excel File
 Load Excel
         │
         ▼
-Remove Empty Rows
-        │
-        ▼
-Remove Duplicate Rows
+Clean Data
         │
         ▼
 Generate Statistics
         │
         ▼
-Save Cleaned Excel
+Generate Charts
+        │
+        ▼
+Save Results
 ```
 
 ---
 
-## 📋 Sample Output
+# 📦 Output
+
+After processing, the application automatically creates:
 
 ```text
-========== PROCESS SUMMARY ==========
+output/
 
-Original Rows      : 12
-Current Rows       : 9
-Removed Empty Rows : 1
-Removed Duplicates : 2
+├── cleaned_data.xlsx
 
--------------------------------------
+└── charts/
 
-Columns            : 5
-Numeric Columns    : 2
-Text Columns       : 3
-Missing Cells      : 2
-Memory Usage       : 1.72 KB
+    ├── missing_values.png
 
-=====================================
+    ├── column_types.png
+
+    └── numeric_distribution.png
 ```
 
 ---
 
-## 🗺 Roadmap
+# 🎯 Project Goals
 
-### ✅ Version 0.2
+This project demonstrates:
+
+- Desktop Application Development
+- Data Cleaning Automation
+- Excel Processing
+- Object-Oriented Programming
+- Modular Architecture
+- Data Visualization
+- Python GUI Development
+
+---
+
+# 🗺 Roadmap
+
+## ✅ Version 1.0.0
 
 - Excel Processing
-- Remove Empty Rows
-- Remove Duplicate Rows
-- Statistics Engine
+- Statistics Dashboard
+- Chart Generation
 - Processing Log
 - Progress Bar
+- Status Bar
+- About Dialog
+- Tooltips
+- Open Output Folder
+- GitHub Release
 
-### 🚧 Planned Features
+---
 
-- Data Visualization
+## 🚀 Version 1.1 (Planned)
+
 - PDF Report Generator
-- Dashboard
 - Batch Processing
-- Drag & Drop Support
-- Dark Theme
 - CSV Support
+- Drag & Drop
+- Multi-sheet Processing
 - Export Statistics
+- Dark Theme
 - Settings Panel
 
 ---
 
-## 🚀 Future Plans
+# 📄 License
 
-- Dashboard
-- Charts
-- PDF Reports
-- Batch Processing
-- Drag & Drop
-- CSV Support
-- Settings
-- Multi Sheet Processing
-- Multi Language Support
+Licensed under the MIT License.
 
 ---
 
-## 🎯 Purpose
-
-This project is part of my software engineering portfolio and focuses on:
-
-- Desktop Application Development
-- Data Processing
-- Object-Oriented Programming
-- Clean Architecture
-- Modular Design
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
----
-
-## 👨‍💻 Author
+# 👨‍💻 Author
 
 **Halit Tiryaki**
 
-Computer Teacher & Python Developer
+Computer Teacher • Python Developer • Desktop Application Developer
 
-GitHub:
-https://github.com/halittiryaki
+GitHub
+
+https://github.com/halittiryakicom
+
+---
+
+⭐ If you like this project, consider giving it a star.
