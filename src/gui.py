@@ -1,5 +1,5 @@
-from src.excel_processor import ExcelProcessor
-from src.statistics import StatisticsEngine
+from core.excel_processor import ExcelProcessor
+from core.statistics import StatisticsEngine
 from pathlib import Path
 from PySide6.QtWidgets import (
     QMainWindow,
@@ -87,7 +87,7 @@ class MainWindow(QMainWindow):
         self.log_box = QTextEdit()
         self.log_box.setReadOnly(True)
         self.log_box.setText("Application started.")
-        main_layout.addWidget(self.log_box)
+        main_layout.addWidget(self.create_statistics_panel())
 
         self.process_button = QPushButton("Process")
         self.process_button.clicked.connect(self.process_excel)
@@ -95,6 +95,34 @@ class MainWindow(QMainWindow):
         
 
         central.setLayout(main_layout)
+
+    def create_statistics_panel(self):
+        self.statistics_group = QGroupBox("Statistics")
+
+        layout = QVBoxLayout()
+        self.original_rows_label = QLabel("Original Rows : -")
+        self.current_rows_label = QLabel("Current Rows : -")
+        self.empty_rows_label = QLabel("Removed Empty : -")
+        self.duplicate_rows_label = QLabel("Removed Duplicate : -")
+        self.columns_label = QLabel("Columns : -")
+        self.numeric_columns_label = QLabel("Numeric Columns : -")
+        self.text_columns_label = QLabel("Text Columns : -")
+        self.missing_cells_label = QLabel("Missing Cells : -")
+        self.memory_usage_label = QLabel("Memory Usage : -")
+
+        layout.addWidget(self.original_rows_label)
+        layout.addWidget(self.current_rows_label)
+        layout.addWidget(self.empty_rows_label)
+        layout.addWidget(self.duplicate_rows_label)
+        layout.addWidget(self.columns_label)
+        layout.addWidget(self.numeric_columns_label)
+        layout.addWidget(self.text_columns_label)
+        layout.addWidget(self.missing_cells_label)
+        layout.addWidget(self.memory_usage_label)
+
+        layout.addStretch()
+
+        self.statistics_group.setLayout(layout)
 
     def browse_excel(self):
 
@@ -108,6 +136,12 @@ class MainWindow(QMainWindow):
         if file_name:
             self.file_path = file_name
             self.path_edit.setText(file_name)
+
+    def update_statistics_panel(
+        self,
+        processor_summary,
+        stats_summary
+    ):setText()
 
     def log(self, message):
         self.log_box.append(message)
