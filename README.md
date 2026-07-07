@@ -152,9 +152,9 @@ python app.py
 
 ## Generated Charts
 
-![alt text](output/charts/column_types.png)
-![alt text](output/charts/missing_values.png)
-![alt text](output/charts/numeric_distribution.png)
+![alt text](screenshots/column_types.png)
+![alt text](screenshots/missing_values.png)
+![alt text](screenshots/numeric_distribution.png)
 
 ---
 
