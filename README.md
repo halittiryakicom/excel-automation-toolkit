@@ -27,6 +27,15 @@ This project was developed as part of my software engineering portfolio to demon
 
 ---
 
+## ✅ Recent Files Support
+
+- Quickly reopen previously used Excel files.
+- Stores up to 5 recent files.
+- Automatically removes missing files.
+- Improves workflow.
+
+---
+
 ## 📈 Statistics Dashboard
 
 Generate useful information about your dataset.
@@ -94,6 +103,12 @@ excel-automation-toolkit/
 ├── output/
 │   ├── cleaned_data.xlsx
 │   └── charts/
+│
+├── config/
+│   └── recent_files.json
+│
+├── services/
+│   └── recent_files_manager.py
 │
 └── src/
     ├── core/
@@ -217,7 +232,7 @@ This project demonstrates:
 
 # 🗺 Roadmap
 
-## ✅ Version 1.0.0
+## ✅ Version 1.1.0
 
 - Excel Processing
 - Statistics Dashboard
@@ -229,10 +244,11 @@ This project demonstrates:
 - Tooltips
 - Open Output Folder
 - GitHub Release
+- Recent Files Support
 
 ---
 
-## 🚀 Version 1.1 (Planned)
+## 🚀 Version 1.2 (Planned)
 
 - PDF Report Generator
 - Batch Processing

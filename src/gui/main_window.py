@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (
     QFileDialog,
@@ -12,6 +13,8 @@ from PySide6.QtWidgets import (
     QMainWindow,
     QMessageBox,
     QProgressBar,
+    QListWidget,
+    QListWidgetItem,
     QPushButton,
     QStatusBar,
     QTextEdit,
@@ -23,6 +26,7 @@ from src.core.charts import ChartGenerator
 from src.core.excel_processor import ExcelProcessor
 from src.core.statistics import StatisticsEngine
 from src.gui.statistics_panel import StatisticsPanel
+from services.recent_files_manager import RecentFilesManager
 
 
 class MainWindow(QMainWindow):
@@ -37,10 +41,12 @@ class MainWindow(QMainWindow):
 
         self.file_path = ""
         self.generated_chart_paths: list[Path] = []
+        self.recent_files_manager = RecentFilesManager()
 
         self.setup_ui()
         self._build_status_bar()
         self._build_menu_bar()
+        self.refresh_recent_files()
 
     def setup_ui(self) -> None:
         """Build the main application interface."""
@@ -52,6 +58,7 @@ class MainWindow(QMainWindow):
         title = QLabel("Excel Automation Toolkit")
         main_layout.addWidget(title)
         main_layout.addLayout(self._build_file_selection_layout())
+        main_layout.addWidget(self._build_recent_files_group())
         main_layout.addWidget(self._build_operations_group())
         main_layout.addWidget(QLabel("Output Folder"))
 
@@ -87,6 +94,21 @@ class MainWindow(QMainWindow):
         file_selection_layout.addWidget(browse_button)
 
         return file_selection_layout
+
+    def _build_recent_files_group(self) -> QGroupBox:
+        """Create the recent files list container."""
+        recent_files_group = QGroupBox("Recent Files")
+        recent_files_group.setToolTip("Quickly reopen recently used Excel files.")
+
+        layout = QVBoxLayout()
+
+        self.recent_files_list = QListWidget()
+        self.recent_files_list.setToolTip("Recently opened Excel files.")
+        self.recent_files_list.itemClicked.connect(self.open_recent_file)
+
+        layout.addWidget(self.recent_files_list)
+        recent_files_group.setLayout(layout)
+        return recent_files_group
 
     def _build_operations_group(self) -> QGroupBox:
         """Create the operations checkbox group."""
@@ -193,7 +215,7 @@ class MainWindow(QMainWindow):
             "About Excel Automation Toolkit",
             (
                 "<b>Excel Automation Toolkit</b><br>"
-                "Version 1.0.0<br><br>"
+                "Version 1.1.0<br><br>"
                 "Developer: Halit Tiryaki<br><br>"
                 "<b>Technologies</b><br>"
                 "Python<br>"
@@ -214,8 +236,53 @@ class MainWindow(QMainWindow):
         )
 
         if file_name:
-            self.file_path = file_name
-            self.path_edit.setText(file_name)
+            self._set_selected_file(file_name)
+
+    def _set_selected_file(self, file_path: str | Path) -> None:
+        """Set the active file path and persist it in recent files."""
+        normalized_path = Path(file_path).expanduser().resolve(strict=False)
+        self.file_path = str(normalized_path)
+        self.path_edit.setText(self.file_path)
+        self.recent_files_manager.add_file(self.file_path)
+        self.refresh_recent_files()
+
+    def refresh_recent_files(self) -> None:
+        """Refresh the recent files list shown in the UI."""
+        recent_files = self.recent_files_manager.get_recent_files()
+
+        self.recent_files_list.clear()
+
+        if not recent_files:
+            empty_item = QListWidgetItem("No recent files")
+            empty_item.setFlags(Qt.ItemFlag.NoItemFlags)
+            self.recent_files_list.addItem(empty_item)
+            return
+
+        for file_path in recent_files:
+            item = QListWidgetItem(Path(file_path).name)
+            item.setData(Qt.ItemDataRole.UserRole, file_path)
+            self.recent_files_list.addItem(item)
+
+    def open_recent_file(self, item: QListWidgetItem) -> None:
+        """Open a file from the recent files list."""
+        file_path = item.data(Qt.ItemDataRole.UserRole)
+
+        if not file_path:
+            return
+
+        selected_path = Path(str(file_path))
+
+        if selected_path.exists():
+            self._set_selected_file(selected_path)
+            return
+
+        self.recent_files_manager.remove_file(selected_path)
+        self.refresh_recent_files()
+        QMessageBox.warning(
+            self,
+            "Recent File Missing",
+            f"The file no longer exists:\n{selected_path}",
+        )
 
     def log(self, message: str) -> None:
         """Append a message to the log panel."""
