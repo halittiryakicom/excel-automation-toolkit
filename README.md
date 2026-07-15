@@ -8,11 +8,11 @@
 
 # 📊 Excel Automation Toolkit
 
-A modern desktop application built with **Python** and **PySide6** for cleaning, processing, analyzing and visualizing Excel files.
+A modern desktop application built with **Python** and **PySide6** for cleaning, processing, analyzing, and visualizing Excel files.
 
-The application provides automatic Excel cleaning, statistical analysis, chart generation and an intuitive desktop interface.
+The application automates common Excel workflows including data cleaning, statistical analysis, chart generation, PDF reporting, and provides an intuitive desktop experience with a modern dark interface.
 
-This project was developed as part of my software engineering portfolio to demonstrate clean architecture, desktop application development and data automation using Python.
+This project was developed as part of my software engineering portfolio to demonstrate desktop application development, clean architecture, and Excel automation using Python.
 
 ---
 
@@ -21,18 +21,21 @@ This project was developed as part of my software engineering portfolio to demon
 ## 📂 Excel Processing
 
 - Load Excel (.xlsx / .xls) files
+- Drag & Drop support
 - Remove empty rows
 - Remove duplicate rows
 - Save cleaned Excel files automatically
 
 ---
 
-## ✅ Recent Files Support
+## 📁 File Management
 
-- Quickly reopen previously used Excel files.
-- Stores up to 5 recent files.
-- Automatically removes missing files.
-- Improves workflow.
+- Recent Files history
+- Remember last used folder
+- Custom output folder
+- Open output folder with one click
+- Browse output directory
+- Full file path tooltips
 
 ---
 
@@ -66,17 +69,30 @@ Charts are exported as PNG files.
 
 ---
 
+## 📄 PDF Report Generation
+
+Generate a professional PDF report including:
+
+- Processing summary
+- Workbook statistics
+- Charts
+- Processing information
+
+---
+
 ## 🖥 Modern Desktop Interface
 
-- PySide6 GUI
-- Statistics Panel
+- Modern Dark Theme
+- Drag & Drop Overlay
+- Organized Dashboard Layout
 - Processing Log
+- Statistics Panel
 - Progress Bar
 - Status Bar
 - About Dialog
 - Tooltips
-- Open Output Folder
 - Success Dialog
+- Responsive Layout
 
 ---
 
@@ -87,6 +103,7 @@ Charts are exported as PNG files.
 - Pandas
 - OpenPyXL
 - Matplotlib
+- ReportLab
 
 ---
 
@@ -100,25 +117,29 @@ excel-automation-toolkit/
 ├── LICENSE
 ├── README.md
 │
-├── output/
-│   ├── cleaned_data.xlsx
-│   └── charts/
-│
 ├── config/
 │   └── recent_files.json
 │
+├── output/
+│   ├── cleaned_data.xlsx
+│   ├── report.pdf
+│   └── charts/
+│
 ├── services/
-│   └── recent_files_manager.py
+│   ├── recent_files_manager.py
+│   └── settings_manager.py
 │
 └── src/
     ├── core/
     │   ├── excel_processor.py
     │   ├── statistics.py
-    │   └── charts.py
+    │   ├── charts.py
+    │   └── pdf_report.py
     │
     └── gui/
         ├── main_window.py
-        └── statistics_panel.py
+        ├── statistics_panel.py
+        └── drop_overlay.py
 ```
 
 ---
@@ -159,6 +180,12 @@ python app.py
 
 ---
 
+## Drag & Drop
+
+![Drag & Drop](screenshots/dragdrop.png)
+
+---
+
 ## Processing Result
 
 ![Processing Result](screenshots/result.png)
@@ -167,31 +194,36 @@ python app.py
 
 ## Generated Charts
 
-![alt text](screenshots/column_types.png)
-![alt text](screenshots/missing_values.png)
-![alt text](screenshots/numeric_distribution.png)
+![Column Types](screenshots/column_types.png)
+
+![Missing Values](screenshots/missing_values.png)
+
+![Numeric Distribution](screenshots/numeric_distribution.png)
 
 ---
 
 # 🔄 Workflow
 
 ```text
-Select Excel File
-        │
-        ▼
-Load Excel
-        │
-        ▼
-Clean Data
-        │
-        ▼
-Generate Statistics
-        │
-        ▼
-Generate Charts
-        │
-        ▼
-Save Results
+Select or Drag Excel File
+            │
+            ▼
+      Load Workbook
+            │
+            ▼
+       Clean Data
+            │
+            ▼
+ Generate Statistics
+            │
+            ▼
+   Generate Charts
+            │
+            ▼
+ Generate PDF Report
+            │
+            ▼
+      Save Results
 ```
 
 ---
@@ -204,6 +236,8 @@ After processing, the application automatically creates:
 output/
 
 ├── cleaned_data.xlsx
+
+├── report.pdf
 
 └── charts/
 
@@ -221,43 +255,48 @@ output/
 This project demonstrates:
 
 - Desktop Application Development
-- Data Cleaning Automation
-- Excel Processing
-- Object-Oriented Programming
-- Modular Architecture
+- Excel Automation
+- Data Cleaning
 - Data Visualization
+- PDF Report Generation
+- Object-Oriented Programming
+- Clean Architecture
 - Python GUI Development
+- Modular Software Design
 
 ---
 
 # 🗺 Roadmap
 
-## ✅ Version 1.1.0
+## ✅ Version 1.2.1
 
-- Excel Processing
+- Drag & Drop Support
+- Drag Overlay
+- Remember Last Folder
+- Recent Files
 - Statistics Dashboard
 - Chart Generation
+- PDF Report Generation
+- Modern UI
+- Responsive Layout
+- Output Folder Management
 - Processing Log
-- Progress Bar
 - Status Bar
 - About Dialog
 - Tooltips
-- Open Output Folder
 - GitHub Release
-- Recent Files Support
 
 ---
 
-## 🚀 Version 1.2 (Planned)
+## 🚀 Future Ideas
 
-- PDF Report Generator
 - Batch Processing
 - CSV Support
-- Drag & Drop
 - Multi-sheet Processing
 - Export Statistics
-- Dark Theme
-- Settings Panel
+- Auto Update
+- Plugin Support
+- Localization (TR / EN)
 
 ---
 
@@ -269,11 +308,15 @@ Licensed under the MIT License.
 
 # 👨‍💻 Author
 
-**Halit Tiryaki**
+## Halit Tiryaki
 
-Computer Teacher • Python Developer • Desktop Application Developer
+**Python Developer • Automation Engineer**
 
-GitHub
+🌐 Website
+
+https://halittiryaki.com
+
+🐙 GitHub
 
 https://github.com/halittiryakicom
 

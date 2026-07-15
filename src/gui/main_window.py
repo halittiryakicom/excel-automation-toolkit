@@ -1,21 +1,33 @@
+"""Main application window for the Excel Automation Toolkit."""
+
 import os
 from pathlib import Path
 
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QAction
+from PySide6.QtCore import Qt, QUrl
+from PySide6.QtGui import (
+    QAction,
+    QDragEnterEvent,
+    QDragLeaveEvent,
+    QDropEvent,
+    QResizeEvent,
+)
 from PySide6.QtWidgets import (
-    QFileDialog,
+    QAbstractItemView,
     QCheckBox,
+    QFileDialog,
+    QFrame,
     QGroupBox,
     QHBoxLayout,
     QLabel,
     QLineEdit,
-    QMainWindow,
-    QMessageBox,
-    QProgressBar,
     QListWidget,
     QListWidgetItem,
+    QMainWindow,
+    QMenu,
+    QMessageBox,
+    QProgressBar,
     QPushButton,
+    QSizePolicy,
     QStatusBar,
     QTextEdit,
     QVBoxLayout,
@@ -25,96 +37,181 @@ from PySide6.QtWidgets import (
 from src.core.charts import ChartGenerator
 from src.core.excel_processor import ExcelProcessor
 from src.core.statistics import StatisticsEngine
+from src.gui.drop_overlay import DropOverlay
 from src.gui.statistics_panel import StatisticsPanel
 from services.recent_files_manager import RecentFilesManager
+from services.settings_manager import SettingsManager
+
+# Application version shown in the status bar and About dialog
+_VERSION = "1.2.1"
 
 
 class MainWindow(QMainWindow):
     """Main window for the Excel Automation Toolkit."""
+
+    # Accepted Excel file extensions for drag & drop and browse validation
+    _ACCEPTED_EXTENSIONS: frozenset[str] = frozenset({".xlsx", ".xls"})
 
     def __init__(self) -> None:
         """Initialize the main application window."""
         super().__init__()
 
         self.setWindowTitle("Excel Automation Toolkit")
-        self.resize(800, 500)
+        self.resize(900, 640)
 
         self.file_path = ""
         self.generated_chart_paths: list[Path] = []
         self.recent_files_manager = RecentFilesManager()
+        self.settings_manager = SettingsManager()
+
+        # Enable the window to receive drag & drop events
+        self.setAcceptDrops(True)
 
         self.setup_ui()
         self._build_status_bar()
         self._build_menu_bar()
         self.refresh_recent_files()
 
+        # Overlay is parented to the central widget so it fills only the
+        # content area (not the menu bar / status bar).
+        self._drop_overlay = DropOverlay(self.centralWidget())
+
+    # ------------------------------------------------------------------
+    # UI construction
+    # ------------------------------------------------------------------
+
     def setup_ui(self) -> None:
         """Build the main application interface."""
         central = QWidget()
         self.setCentralWidget(central)
 
-        main_layout = QVBoxLayout()
+        main_layout = QVBoxLayout(central)
+        main_layout.setContentsMargins(12, 12, 12, 12)
+        main_layout.setSpacing(8)
 
-        title = QLabel("Excel Automation Toolkit")
-        main_layout.addWidget(title)
-        main_layout.addLayout(self._build_file_selection_layout())
+        main_layout.addWidget(self._build_file_section())
         main_layout.addWidget(self._build_recent_files_group())
-        main_layout.addWidget(self._build_operations_group())
-        main_layout.addWidget(QLabel("Output Folder"))
 
-        self.output_folder_edit = QLineEdit("output/")
-        self.output_folder_edit.setReadOnly(True)
-        self.output_folder_edit.setToolTip("Folder where generated files are saved.")
-        main_layout.addWidget(self.output_folder_edit)
+        # Middle row: Operations | Output Folder (side by side)
+        middle_row = QHBoxLayout()
+        middle_row.setSpacing(8)
+        middle_row.addWidget(self._build_operations_group(), 1)
+        middle_row.addWidget(self._build_output_folder_group(), 1)
+        main_layout.addLayout(middle_row)
 
         self.progress_bar = QProgressBar()
         self.progress_bar.setValue(0)
+        self.progress_bar.setFixedHeight(6)
         self.progress_bar.setToolTip("Processing progress.")
+        self.progress_bar.setTextVisible(False)
         main_layout.addWidget(self.progress_bar)
 
-        main_layout.addLayout(self._build_results_layout())
+        main_layout.addLayout(self._build_results_layout(), stretch=1)
+        main_layout.addWidget(self._build_process_button())
 
-        main_layout.addLayout(self._build_action_buttons_layout())
+    # ── File selection section ─────────────────────────────────────────
 
-        central.setLayout(main_layout)
+    def _build_file_section(self) -> QGroupBox:
+        """Create the file selection group with a clean filename display."""
+        group = QGroupBox("Selected File")
+        group.setToolTip("Excel file that will be processed.")
+        layout = QHBoxLayout(group)
+        layout.setContentsMargins(8, 8, 8, 8)
+        layout.setSpacing(8)
 
-    def _build_file_selection_layout(self) -> QHBoxLayout:
-        """Create the file selection controls."""
-        file_selection_layout = QHBoxLayout()
+        # Icon + filename label (replaces the raw path line edit)
+        self._file_icon_label = QLabel("📄")
+        self._file_icon_label.setFixedWidth(22)
+        self._file_icon_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.path_edit = QLineEdit()
-        self.path_edit.setReadOnly(True)
-        self.path_edit.setToolTip("Selected Excel file path.")
+        self.path_edit = QLabel("No file selected")
+        self.path_edit.setObjectName("filePathLabel")
+        self.path_edit.setToolTip("")
+        self.path_edit.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
+        )
+        self.path_edit.setStyleSheet("color: #888; font-style: italic;")
 
-        browse_button = QPushButton("Browse Excel")
+        browse_button = QPushButton("Browse…")
+        browse_button.setFixedWidth(90)
         browse_button.setToolTip("Choose an Excel file to process.")
         browse_button.clicked.connect(self.browse_excel)
 
-        file_selection_layout.addWidget(self.path_edit)
-        file_selection_layout.addWidget(browse_button)
+        layout.addWidget(self._file_icon_label)
+        layout.addWidget(self.path_edit, stretch=1)
+        layout.addWidget(browse_button)
+        return group
 
-        return file_selection_layout
+    # ── Recent files ──────────────────────────────────────────────────
 
     def _build_recent_files_group(self) -> QGroupBox:
-        """Create the recent files list container."""
-        recent_files_group = QGroupBox("Recent Files")
-        recent_files_group.setToolTip("Quickly reopen recently used Excel files.")
-
-        layout = QVBoxLayout()
+        """Create the recent files list with double-click and context menu."""
+        group = QGroupBox("Recent Files")
+        group.setToolTip("Quickly reopen recently used Excel files.")
+        layout = QVBoxLayout(group)
+        layout.setContentsMargins(6, 6, 6, 6)
 
         self.recent_files_list = QListWidget()
-        self.recent_files_list.setToolTip("Recently opened Excel files.")
-        self.recent_files_list.itemClicked.connect(self.open_recent_file)
+        self.recent_files_list.setFixedHeight(72)
+        self.recent_files_list.setToolTip(
+            "Double-click to open. Right-click for options."
+        )
+        self.recent_files_list.setEditTriggers(
+            QAbstractItemView.EditTrigger.NoEditTriggers
+        )
+        # Double-click loads the file
+        self.recent_files_list.itemDoubleClicked.connect(self.open_recent_file)
+        # Right-click context menu
+        self.recent_files_list.setContextMenuPolicy(
+            Qt.ContextMenuPolicy.CustomContextMenu
+        )
+        self.recent_files_list.customContextMenuRequested.connect(
+            self._show_recent_files_context_menu
+        )
 
         layout.addWidget(self.recent_files_list)
-        recent_files_group.setLayout(layout)
-        return recent_files_group
+        return group
+
+    def _show_recent_files_context_menu(self, pos) -> None:
+        """Show a context menu for the recent files list."""
+        item = self.recent_files_list.itemAt(pos)
+        menu = QMenu(self)
+
+        if item and item.data(Qt.ItemDataRole.UserRole):
+            remove_action = menu.addAction("Remove")
+            remove_action.triggered.connect(lambda: self._remove_recent_file(item))
+            menu.addSeparator()
+
+        clear_action = menu.addAction("Clear History")
+        clear_action.triggered.connect(self._clear_recent_files)
+
+        menu.exec(self.recent_files_list.mapToGlobal(pos))
+
+    def _remove_recent_file(self, item: QListWidgetItem) -> None:
+        """Remove a single entry from the recent files list."""
+        file_path = item.data(Qt.ItemDataRole.UserRole)
+        if file_path:
+            self.recent_files_manager.remove_file(file_path)
+            self.refresh_recent_files()
+
+    def _clear_recent_files(self) -> None:
+        """Clear the entire recent files history."""
+        for file_path in self.recent_files_manager.get_recent_files():
+            self.recent_files_manager.remove_file(file_path)
+        self.refresh_recent_files()
+
+    # ── Operations ────────────────────────────────────────────────────
 
     def _build_operations_group(self) -> QGroupBox:
-        """Create the operations checkbox group."""
-        operations_group = QGroupBox("Operations")
-        operations_group.setToolTip("Select which operations to run.")
-        operations_layout = QVBoxLayout()
+        """Create the operations checkbox group with categorised sections."""
+        group = QGroupBox("Operations")
+        group.setToolTip("Select which operations to run.")
+        layout = QVBoxLayout(group)
+        layout.setContentsMargins(8, 8, 8, 8)
+        layout.setSpacing(4)
+
+        # ── Cleaning category ────────────────────────────────────────
+        layout.addWidget(self._make_category_label("Cleaning"))
 
         self.remove_empty_rows_checkbox = QCheckBox("Remove Empty Rows")
         self.remove_empty_rows_checkbox.setChecked(True)
@@ -128,34 +225,77 @@ class MainWindow(QMainWindow):
             "Remove rows that are exact duplicates."
         )
 
-        self.generate_statistics_checkbox = QCheckBox("Generate Statistics")
+        layout.addWidget(self.remove_empty_rows_checkbox)
+        layout.addWidget(self.remove_duplicate_rows_checkbox)
+
+        layout.addWidget(self._make_section_divider())
+
+        # ── Reports category ─────────────────────────────────────────
+        layout.addWidget(self._make_category_label("Reports"))
+
+        self.generate_statistics_checkbox = QCheckBox("Statistics")
         self.generate_statistics_checkbox.setToolTip(
             "Generate summary statistics for the processed data."
         )
-        self.generate_charts_checkbox = QCheckBox("Generate Charts")
+        self.generate_charts_checkbox = QCheckBox("Charts")
         self.generate_charts_checkbox.setToolTip(
             "Generate chart images in the output charts folder."
         )
-        self.generate_pdf_report_checkbox = QCheckBox("Generate PDF Report")
+        self.generate_pdf_report_checkbox = QCheckBox("PDF Report")
         self.generate_pdf_report_checkbox.setToolTip(
             "Reserve report generation for PDF output."
         )
 
-        operations_layout.addWidget(self.remove_empty_rows_checkbox)
-        operations_layout.addWidget(self.remove_duplicate_rows_checkbox)
-        operations_layout.addWidget(self.generate_statistics_checkbox)
-        operations_layout.addWidget(self.generate_charts_checkbox)
-        operations_layout.addWidget(self.generate_pdf_report_checkbox)
+        layout.addWidget(self.generate_statistics_checkbox)
+        layout.addWidget(self.generate_charts_checkbox)
+        layout.addWidget(self.generate_pdf_report_checkbox)
+        layout.addStretch()
 
-        operations_group.setLayout(operations_layout)
-        return operations_group
+        return group
+
+    # ── Output folder ─────────────────────────────────────────────────
+
+    def _build_output_folder_group(self) -> QGroupBox:
+        """Create the output folder section with browse and open buttons."""
+        group = QGroupBox("Output Folder")
+        group.setToolTip("Folder where generated files are saved.")
+        layout = QVBoxLayout(group)
+        layout.setContentsMargins(8, 8, 8, 8)
+        layout.setSpacing(6)
+
+        self.output_folder_edit = QLineEdit("output/")
+        self.output_folder_edit.setReadOnly(True)
+        self.output_folder_edit.setToolTip("Folder where generated files are saved.")
+        layout.addWidget(self.output_folder_edit)
+
+        btn_row = QHBoxLayout()
+        btn_row.setSpacing(6)
+
+        browse_output_button = QPushButton("Browse")
+        browse_output_button.setToolTip("Choose a different output folder.")
+        browse_output_button.clicked.connect(self._browse_output_folder)
+
+        self.open_output_folder_button = QPushButton("📂 Open Folder")
+        self.open_output_folder_button.setToolTip("Open the configured output folder.")
+        self.open_output_folder_button.clicked.connect(self.open_output_folder)
+
+        btn_row.addWidget(browse_output_button)
+        btn_row.addWidget(self.open_output_folder_button)
+        layout.addLayout(btn_row)
+        layout.addStretch()
+
+        return group
+
+    # ── Results (Log + Statistics) ────────────────────────────────────
 
     def _build_results_layout(self) -> QHBoxLayout:
         """Create the side-by-side log and statistics panels."""
         results_layout = QHBoxLayout()
+        results_layout.setSpacing(8)
 
         log_group = QGroupBox("Log")
-        log_layout = QVBoxLayout()
+        log_layout = QVBoxLayout(log_group)
+        log_layout.setContentsMargins(6, 6, 6, 6)
 
         self.log_box = QTextEdit()
         self.log_box.setReadOnly(True)
@@ -163,7 +303,6 @@ class MainWindow(QMainWindow):
         self.log_box.setToolTip("Processing messages and results.")
 
         log_layout.addWidget(self.log_box)
-        log_group.setLayout(log_layout)
 
         self.statistics_panel = StatisticsPanel()
         self.statistics_panel.setToolTip("Statistics for the processed workbook.")
@@ -173,30 +312,31 @@ class MainWindow(QMainWindow):
 
         return results_layout
 
-    def _build_action_buttons_layout(self) -> QHBoxLayout:
-        """Create the main action buttons."""
-        action_buttons_layout = QHBoxLayout()
+    # ── Process button ────────────────────────────────────────────────
 
-        self.process_button = QPushButton("Process")
+    def _build_process_button(self) -> QPushButton:
+        """Create the main process action button."""
+        self.process_button = QPushButton("🚀  Process Excel File")
+        self.process_button.setFixedHeight(42)
         self.process_button.setToolTip("Run the selected Excel operations.")
         self.process_button.clicked.connect(self.process_excel)
+        return self.process_button
 
-        self.open_output_folder_button = QPushButton("📂 Open Output Folder")
-        self.open_output_folder_button.setToolTip(
-            "Open the configured output folder."
-        )
-        self.open_output_folder_button.clicked.connect(self.open_output_folder)
-
-        action_buttons_layout.addWidget(self.process_button)
-        action_buttons_layout.addWidget(self.open_output_folder_button)
-
-        return action_buttons_layout
+    # ── Status bar ────────────────────────────────────────────────────
 
     def _build_status_bar(self) -> None:
-        """Create the main window status bar."""
+        """Create the main window status bar with version indicator."""
         self.status_bar = QStatusBar()
         self.setStatusBar(self.status_bar)
+
+        # Permanent right-hand version label
+        version_label = QLabel(f"v{_VERSION}")
+        version_label.setStyleSheet("color: #666; margin-right: 6px;")
+        self.status_bar.addPermanentWidget(version_label)
+
         self.set_status("Ready")
+
+    # ── Menu bar ──────────────────────────────────────────────────────
 
     def _build_menu_bar(self) -> None:
         """Create the application menu bar."""
@@ -208,6 +348,29 @@ class MainWindow(QMainWindow):
 
         help_menu.addAction(about_action)
 
+    # ── Helper widgets ────────────────────────────────────────────────
+
+    @staticmethod
+    def _make_category_label(text: str) -> QLabel:
+        """Return a styled uppercase category label for the operations group."""
+        label = QLabel(text)
+        label.setStyleSheet(
+            "font-size: 9px; color: #5a5a7a; font-weight: 700; letter-spacing: 1px;"
+        )
+        return label
+
+    @staticmethod
+    def _make_section_divider() -> QFrame:
+        """Return a thin horizontal line to divide operation categories."""
+        line = QFrame()
+        line.setFrameShape(QFrame.Shape.HLine)
+        line.setStyleSheet("color: #2a2a3a; margin: 2px 0;")
+        return line
+
+    # ------------------------------------------------------------------
+    # About dialog
+    # ------------------------------------------------------------------
+
     def show_about_dialog(self) -> None:
         """Display application information."""
         QMessageBox.about(
@@ -215,7 +378,7 @@ class MainWindow(QMainWindow):
             "About Excel Automation Toolkit",
             (
                 "<b>Excel Automation Toolkit</b><br>"
-                "Version 1.1.0<br><br>"
+                f"Version {_VERSION}<br><br>"
                 "Developer: Halit Tiryaki<br><br>"
                 "<b>Technologies</b><br>"
                 "Python<br>"
@@ -226,25 +389,111 @@ class MainWindow(QMainWindow):
             ),
         )
 
+    # ------------------------------------------------------------------
+    # Drag & Drop
+    # ------------------------------------------------------------------
+
+    def dragEnterEvent(self, event: QDragEnterEvent) -> None:
+        """Accept the drag if it contains at least one valid Excel file URL."""
+        if event.mimeData().hasUrls() and self._drag_contains_excel(
+            event.mimeData().urls()
+        ):
+            event.acceptProposedAction()
+            self._drop_overlay.show_overlay()
+        else:
+            event.ignore()
+
+    def dragLeaveEvent(self, event: QDragLeaveEvent) -> None:
+        """Hide the overlay when the drag leaves the window."""
+        self._drop_overlay.hide_overlay()
+        super().dragLeaveEvent(event)
+
+    def dropEvent(self, event: QDropEvent) -> None:
+        """Handle a file drop: validate the extension and load the first Excel file."""
+        # Always dismiss the overlay immediately on drop regardless of validity
+        self._drop_overlay.force_hide()
+
+        urls: list[QUrl] = event.mimeData().urls()
+        excel_urls = [url for url in urls if self._is_valid_excel_url(url)]
+
+        if not excel_urls:
+            self.log("Drop rejected: no valid Excel file (.xlsx / .xls) found.")
+            self.set_status("Drop rejected — not a valid Excel file.")
+            QMessageBox.warning(
+                self,
+                "Invalid File",
+                "Please drop a valid Excel file (.xlsx or .xls).",
+            )
+            return
+
+        # Use only the first valid file when multiple files are dropped
+        file_path = excel_urls[0].toLocalFile()
+        self.log(f"File dropped: {file_path}")
+        self.set_status(f"File loaded via drag & drop: {Path(file_path).name}")
+        self._set_selected_file(file_path)
+
+    def _drag_contains_excel(self, urls: list[QUrl]) -> bool:
+        """Return True if at least one URL points to a valid Excel file."""
+        return any(self._is_valid_excel_url(url) for url in urls)
+
+    def _is_valid_excel_url(self, url: QUrl) -> bool:
+        """Return True if the URL is a local file with an accepted Excel extension."""
+        if not url.isLocalFile():
+            return False
+        return Path(url.toLocalFile()).suffix.lower() in self._ACCEPTED_EXTENSIONS
+
+    def resizeEvent(self, event: QResizeEvent) -> None:
+        """Keep the drop overlay filling the central widget on every resize."""
+        super().resizeEvent(event)
+        self._drop_overlay.refit()
+
+    # ------------------------------------------------------------------
+    # File selection
+    # ------------------------------------------------------------------
+
     def browse_excel(self) -> None:
         """Open a file dialog and store the selected Excel file path."""
+        start_dir = self.settings_manager.get_last_folder()
+
         file_name, _ = QFileDialog.getOpenFileName(
             self,
             "Select Excel File",
-            "",
+            start_dir,
             "Excel Files (*.xlsx *.xls)",
         )
 
         if file_name:
             self._set_selected_file(file_name)
 
+    def _browse_output_folder(self) -> None:
+        """Open a directory dialog to change the output folder."""
+        folder = QFileDialog.getExistingDirectory(
+            self,
+            "Select Output Folder",
+            self.output_folder_edit.text(),
+        )
+        if folder:
+            self.output_folder_edit.setText(folder)
+
     def _set_selected_file(self, file_path: str | Path) -> None:
-        """Set the active file path and persist it in recent files."""
+        """Set the active file path, persist it in recent files, and remember its folder."""
         normalized_path = Path(file_path).expanduser().resolve(strict=False)
         self.file_path = str(normalized_path)
-        self.path_edit.setText(self.file_path)
+
+        # Show only the filename in the label; full path lives in the tooltip
+        self.path_edit.setText(normalized_path.name)
+        self.path_edit.setToolTip(self.file_path)
+        self.path_edit.setStyleSheet("color: #e8e8f0; font-style: normal; font-weight: 500;")
+
         self.recent_files_manager.add_file(self.file_path)
         self.refresh_recent_files()
+
+        # Persist the parent directory so the next file dialog opens here
+        self.settings_manager.set_last_folder(str(normalized_path.parent))
+
+    # ------------------------------------------------------------------
+    # Recent files
+    # ------------------------------------------------------------------
 
     def refresh_recent_files(self) -> None:
         """Refresh the recent files list shown in the UI."""
@@ -261,10 +510,11 @@ class MainWindow(QMainWindow):
         for file_path in recent_files:
             item = QListWidgetItem(Path(file_path).name)
             item.setData(Qt.ItemDataRole.UserRole, file_path)
+            item.setToolTip(file_path)
             self.recent_files_list.addItem(item)
 
     def open_recent_file(self, item: QListWidgetItem) -> None:
-        """Open a file from the recent files list."""
+        """Open a file from the recent files list (single-click or double-click)."""
         file_path = item.data(Qt.ItemDataRole.UserRole)
 
         if not file_path:
@@ -284,6 +534,10 @@ class MainWindow(QMainWindow):
             f"The file no longer exists:\n{selected_path}",
         )
 
+    # ------------------------------------------------------------------
+    # Logging and progress
+    # ------------------------------------------------------------------
+
     def log(self, message: str) -> None:
         """Append a message to the log panel."""
         self.log_box.append(message)
@@ -296,6 +550,10 @@ class MainWindow(QMainWindow):
         """Set the current status bar message."""
         self.status_bar.showMessage(message)
 
+    # ------------------------------------------------------------------
+    # Validation
+    # ------------------------------------------------------------------
+
     def validate_input(self) -> bool:
         """Validate that an Excel file has been selected."""
         if not self.file_path:
@@ -305,8 +563,11 @@ class MainWindow(QMainWindow):
                 "Please select an Excel file first.",
             )
             return False
-
         return True
+
+    # ------------------------------------------------------------------
+    # Output folder
+    # ------------------------------------------------------------------
 
     def open_output_folder(self) -> None:
         """Open the current output folder with the operating system."""
@@ -321,6 +582,10 @@ class MainWindow(QMainWindow):
             return
 
         os.startfile(output_folder)
+
+    # ------------------------------------------------------------------
+    # Processing pipeline
+    # ------------------------------------------------------------------
 
     def show_statistics(self, processor: ExcelProcessor) -> None:
         """Log and display processing statistics."""
