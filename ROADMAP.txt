@@ -1,0 +1,123 @@
+🚀 Excel Automation Toolkit Roadmap (v1.2.0)
+
+## 🎯 User Experience (UX)
+
+- [x] Drag & Drop support for Excel files
+- [x] Remember last used folder
+- [ ] Recent files list 
+		v1.3.0 da yapılacak
+- [ ] Light / Dark theme support
+		v1.4.0 da yapılacak
+- [ ] Settings page
+		v1.3.0 da yapılacak
+
+---
+
+## 📊 Excel Features
+
+- [ ] Process selected columns only
+- [ ] Conditional filtering
+- [ ] Find & Replace
+- [ ] Date format conversion
+- [ ] Number formatting
+- [ ] Worksheet selection
+- [ ] Merge multiple Excel files
+
+---
+
+## 📈 Reporting
+
+- [ ] Generate PDF report
+- [ ] Generate HTML report
+- [ ] Processing summary report
+- [ ] Before / After comparison report
+
+---
+
+## 📉 Charts
+
+- [ ] Bar Chart
+- [ ] Pie Chart
+- [ ] Line Chart
+- [ ] Include charts in PDF reports
+
+---
+
+## ⚙️ Automation
+
+- [ ] Processing profiles (Presets)
+- [ ] One-click automation
+- [ ] Batch Processing (entire folder)
+- [ ] Command Line (CLI) support
+
+---
+
+## 📁 Export
+
+- [ ] CSV Export
+- [ ] JSON Export
+- [ ] XML Export
+- [ ] PDF Export
+
+---
+
+## 🖥️ Interface
+
+- [ ] Modern icons
+- [ ] Context (Right Click) menu
+- [ ] Status notifications
+- [ ] Processing history
+
+---
+
+## 🛠️ Technical Improvements
+
+- [ ] Unit test infrastructure
+- [ ] Improved logging
+- [ ] Error reporting
+- [ ] Performance optimization
+
+---
+
+# ⭐ v1.3.0 (Future)
+
+- [ ] Plugin system
+- [ ] Multi-language support
+- [ ] Excel Preview
+- [ ] Formula analysis
+- [ ] Cell formatting tools
+- [ ] Duplicate Finder window
+- [ ] AI-powered data analysis
+
+---
+
+# 🎯 Priorities
+
+## 🔴 High Priority
+
+- [ ] Drag & Drop
+- [ ] Batch Processing
+- [ ] Worksheet selection
+- [ ] PDF Report
+
+## 🟠 Medium Priority
+
+- [ ] Processing Presets
+- [ ] Remember last folder
+- [ ] Processing history
+
+## 🟢 Low Priority
+
+- [ ] Dark Mode
+- [ ] JSON Export
+- [ ] HTML Report
+
+---
+
+# 📌 Main Goal for v1.2
+
+Theme:
+
+"Process Multiple Excel Files with One Click"
+
+The primary objective of v1.2 is to introduce Batch Processing, allowing users to select a folder and automatically process every Excel file inside it with a single click.
