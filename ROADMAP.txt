@@ -27,7 +27,7 @@
 
 ## 📈 Reporting
 
-- [ ] Generate PDF report
+- [x] Generate PDF report
 - [ ] Generate HTML report
 - [ ] Processing summary report
 - [ ] Before / After comparison report
@@ -39,7 +39,7 @@
 - [ ] Bar Chart
 - [ ] Pie Chart
 - [ ] Line Chart
-- [ ] Include charts in PDF reports
+- [x] Include charts in PDF reports
 
 ---
 
@@ -47,7 +47,7 @@
 
 - [ ] Processing profiles (Presets)
 - [ ] One-click automation
-- [ ] Batch Processing (entire folder)
+- [x] Batch Processing (entire folder)
 - [ ] Command Line (CLI) support
 
 ---
@@ -96,9 +96,9 @@
 ## 🔴 High Priority
 
 - [ ] Drag & Drop
-- [ ] Batch Processing
+- [x] Batch Processing
 - [ ] Worksheet selection
-- [ ] PDF Report
+- [x] PDF Report
 
 ## 🟠 Medium Priority
 
