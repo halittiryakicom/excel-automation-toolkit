@@ -13,6 +13,7 @@ from PySide6.QtGui import (
 )
 from PySide6.QtWidgets import (
     QAbstractItemView,
+    QApplication,
     QCheckBox,
     QFileDialog,
     QFrame,
@@ -34,8 +35,10 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from src.core.batch_processor import ProcessingOptions, process_folder
 from src.core.charts import ChartGenerator
 from src.core.excel_processor import ExcelProcessor
+from src.core.pdf_generator import PdfReportGenerator
 from src.core.statistics import StatisticsEngine
 from src.gui.drop_overlay import DropOverlay
 from src.gui.statistics_panel import StatisticsPanel
@@ -61,6 +64,8 @@ class MainWindow(QMainWindow):
 
         self.file_path = ""
         self.generated_chart_paths: list[Path] = []
+        self.report_chart_paths: list[Path] = []
+        self.generated_pdf_path: Path | None = None
         self.recent_files_manager = RecentFilesManager()
         self.settings_manager = SettingsManager()
 
@@ -107,7 +112,12 @@ class MainWindow(QMainWindow):
         main_layout.addWidget(self.progress_bar)
 
         main_layout.addLayout(self._build_results_layout(), stretch=1)
-        main_layout.addWidget(self._build_process_button())
+
+        action_row = QHBoxLayout()
+        action_row.setSpacing(8)
+        action_row.addWidget(self._build_process_button(), 2)
+        action_row.addWidget(self._build_batch_button(), 1)
+        main_layout.addLayout(action_row)
 
     # ── File selection section ─────────────────────────────────────────
 
@@ -243,7 +253,7 @@ class MainWindow(QMainWindow):
         )
         self.generate_pdf_report_checkbox = QCheckBox("PDF Report")
         self.generate_pdf_report_checkbox.setToolTip(
-            "Reserve report generation for PDF output."
+            "Create report.pdf with summary, statistics, data preview and charts."
         )
 
         layout.addWidget(self.generate_statistics_checkbox)
@@ -321,6 +331,16 @@ class MainWindow(QMainWindow):
         self.process_button.setToolTip("Run the selected Excel operations.")
         self.process_button.clicked.connect(self.process_excel)
         return self.process_button
+
+    def _build_batch_button(self) -> QPushButton:
+        """Create the button that processes a whole folder of workbooks."""
+        self.batch_button = QPushButton("📁  Process Folder (Batch)")
+        self.batch_button.setFixedHeight(42)
+        self.batch_button.setToolTip(
+            "Process every Excel file in a folder with the selected operations."
+        )
+        self.batch_button.clicked.connect(self.process_folder_batch)
+        return self.batch_button
 
     # ── Status bar ────────────────────────────────────────────────────
 
@@ -647,7 +667,9 @@ class MainWindow(QMainWindow):
 
     def generate_charts(self, processor: ExcelProcessor) -> None:
         """Generate charts when the chart operation is selected."""
-        if not self.generate_charts_checkbox.isChecked():
+        wants_charts = self.generate_charts_checkbox.isChecked()
+        wants_pdf = self.generate_pdf_report_checkbox.isChecked()
+        if not (wants_charts or wants_pdf):
             return
 
         output_folder = Path(self.output_folder_edit.text())
@@ -657,7 +679,9 @@ class MainWindow(QMainWindow):
 
         chart_generator = ChartGenerator(processor.df)
         generated_charts = chart_generator.generate_all(output_folder)
-        self.generated_chart_paths = generated_charts
+        self.report_chart_paths = generated_charts
+        if wants_charts:
+            self.generated_chart_paths = generated_charts
 
         progress_step = 6 // max(len(generated_charts), 1)
         current_progress = 82
@@ -666,6 +690,26 @@ class MainWindow(QMainWindow):
             current_progress += progress_step
             self.set_progress(min(current_progress, 88))
             self.log(f"Generated chart: {chart_path}")
+
+    def generate_pdf_report(self, processor: ExcelProcessor) -> None:
+        """Create the PDF report when the PDF operation is selected."""
+        if not self.generate_pdf_report_checkbox.isChecked():
+            return
+
+        output_folder = Path(self.output_folder_edit.text())
+        self.set_status("Generating PDF Report...")
+        self.log("Generating PDF report...")
+        self.set_progress(89)
+
+        self.generated_pdf_path = PdfReportGenerator().generate(
+            output_folder / "report.pdf",
+            Path(self.file_path).name,
+            processor.df,
+            processor.get_summary(),
+            StatisticsEngine(processor.df).generate_summary(),
+            self.report_chart_paths,
+        )
+        self.log(f"Generated PDF report: {self.generated_pdf_path}")
 
     def finish_processing(self, processor: ExcelProcessor) -> None:
         """Finish processing and notify the user."""
@@ -726,6 +770,9 @@ class MainWindow(QMainWindow):
         if self.generated_chart_paths:
             generated_files.append("- generated charts")
 
+        if self.generated_pdf_path:
+            generated_files.append("- report.pdf")
+
         return "\n".join(generated_files)
 
     def process_excel(self) -> None:
@@ -735,6 +782,8 @@ class MainWindow(QMainWindow):
 
         self.progress_bar.setValue(0)
         self.generated_chart_paths = []
+        self.report_chart_paths = []
+        self.generated_pdf_path = None
         self.log("Starting Excel processing...")
 
         try:
@@ -743,6 +792,84 @@ class MainWindow(QMainWindow):
             self.save_excel(processor)
             self.generate_charts(processor)
             self.show_statistics(processor)
+            self.generate_pdf_report(processor)
             self.finish_processing(processor)
         except Exception as error:
             self.handle_error(str(error))
+
+    # ------------------------------------------------------------------
+    # Batch processing
+    # ------------------------------------------------------------------
+
+    def process_folder_batch(self) -> None:
+        """Process every Excel file in a chosen folder."""
+        input_folder = QFileDialog.getExistingDirectory(
+            self,
+            "Select Folder With Excel Files",
+            self.settings_manager.get_last_folder(),
+        )
+        if not input_folder:
+            return
+
+        self.settings_manager.set_last_folder(input_folder)
+        output_root = Path(self.output_folder_edit.text()) / f"batch_{Path(input_folder).name}"
+        options = ProcessingOptions(
+            remove_empty_rows=self.remove_empty_rows_checkbox.isChecked(),
+            remove_duplicates=self.remove_duplicate_rows_checkbox.isChecked(),
+            generate_charts=self.generate_charts_checkbox.isChecked(),
+            generate_pdf=self.generate_pdf_report_checkbox.isChecked(),
+        )
+
+        self.progress_bar.setValue(0)
+        self.set_status("Batch processing...")
+        self.log("")
+        self.log(f"Starting batch processing: {input_folder}")
+        self.batch_button.setEnabled(False)
+        self.process_button.setEnabled(False)
+
+        try:
+            batch = process_folder(
+                input_folder, output_root, options, on_progress=self._on_batch_progress
+            )
+        except Exception as error:
+            self.handle_error(str(error))
+            return
+        finally:
+            self.batch_button.setEnabled(True)
+            self.process_button.setEnabled(True)
+
+        for result in batch.results:
+            if result.success:
+                self.log(f"OK      {result.source.name}")
+            else:
+                self.log(f"FAILED  {result.source.name} - {result.error}")
+
+        self.log(f"Batch finished: {batch.succeeded} succeeded, {batch.failed} failed.")
+        self.log(f"Summary: {batch.summary_path}")
+        self.set_progress(100)
+        self.set_status("Batch Completed")
+
+        message_box = QMessageBox(self)
+        message_box.setIcon(
+            QMessageBox.Icon.Warning if batch.failed else QMessageBox.Icon.Information
+        )
+        message_box.setWindowTitle("Batch Completed")
+        message_box.setText(f"{batch.succeeded} of {len(batch.results)} files processed.")
+        message_box.setInformativeText(
+            f"Failed: {batch.failed}\n\nResults and batch_summary.xlsx are in:\n{output_root}"
+        )
+        message_box.addButton(QMessageBox.StandardButton.Ok)
+        open_button = message_box.addButton(
+            "Open Output Folder", QMessageBox.ButtonRole.ActionRole
+        )
+        message_box.exec()
+        if message_box.clickedButton() == open_button:
+            os.startfile(output_root)
+
+    def _on_batch_progress(self, done: int, total: int, current: Path) -> None:
+        """Update the progress bar and keep the UI responsive during a batch."""
+        self.set_progress(int(done / total * 100))
+        if done < total:
+            self.set_status(f"Processing {current.name} ({done + 1}/{total})")
+            self.log(f"Processing {current.name} ({done + 1}/{total})...")
+        QApplication.processEvents()

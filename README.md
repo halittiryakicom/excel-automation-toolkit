@@ -78,6 +78,11 @@ Generate a professional PDF report including:
 - Charts
 - Processing information
 
+## 📁 Batch Processing
+
+Click **Process Folder (Batch)** to run the selected operations on every Excel file in a folder.
+Each file gets its own output sub-folder (cleaned data, charts, `report.pdf`) and a combined `batch_summary.xlsx` lists the result of every file. A corrupt file is reported and skipped without stopping the batch.
+
 ---
 
 ## 🖥 Modern Desktop Interface
@@ -289,8 +294,6 @@ This project demonstrates:
 ---
 
 ## 🚀 Future Ideas
-
-- Batch Processing
 - CSV Support
 - Multi-sheet Processing
 - Export Statistics
