@@ -1,123 +1,68 @@
-🚀 Excel Automation Toolkit Roadmap (v1.2.0)
+🚀 Excel Automation Toolkit — Roadmap
+Last updated: 2026-09-30 · Current release: v1.2.1 (Python / PySide6)
 
-## 🎯 User Experience (UX)
+Status: [x] done · [ ] planned · (later) = parked until the .NET version
 
+====================================================================
+✅ DONE (v1.0 – v1.2.1)
+====================================================================
+- [x] Dashboard, statistics panel, automatic charts (v1.0)
 - [x] Drag & Drop support for Excel files
 - [x] Remember last used folder
-- [ ] Recent files list 
-		v1.3.0 da yapılacak
-- [ ] Light / Dark theme support
-		v1.4.0 da yapılacak
+- [x] Recent files list
+- [x] Excel cleaning: empty rows, duplicate rows
+- [x] Batch processing (entire folder)
+- [x] PDF report generation, charts included in PDF reports
+- [x] Major UI / UX improvements (v1.2.1)
+
+====================================================================
+🔜 NEXT — v2.0: .NET version (planned in Oct 2026, week 3)
+====================================================================
+Decision (2026-09-28): all portfolio projects move to .NET.
+v2.0 = feature parity with v1.2.1 on .NET, plus the AI feature below.
+
+- [ ] Scope + estimate for the .NET port (UI framework choice, Excel library, PDF library)
+- [ ] Feature parity: open / clean / statistics / charts / batch / PDF report
 - [ ] Settings page
-		v1.3.0 da yapılacak
+- [ ] Worksheet selection
+- [ ] Installer / single-file release on GitHub Releases
 
----
+⭐ Showcase feature — "Ask your Excel" (AI)
+- [ ] Ask questions in plain Turkish/English about the opened file
+      (e.g. "top 10 products by sales", "monthly totals", "which rows are missing a price?")
+- [ ] Answer as a table / chart that can be added to the PDF report
+- [ ] Privacy first: user is told what is sent to the AI service; option to send only
+      column names + aggregates instead of raw rows
+- [ ] Cost guard: per-request limit and a running cost display
 
-## 📊 Excel Features
-
+====================================================================
+📊 Excel features (backlog)
+====================================================================
 - [ ] Process selected columns only
 - [ ] Conditional filtering
 - [ ] Find & Replace
 - [ ] Date format conversion
 - [ ] Number formatting
-- [ ] Worksheet selection
 - [ ] Merge multiple Excel files
 
----
-
-## 📈 Reporting
-
-- [x] Generate PDF report
-- [ ] Generate HTML report
+====================================================================
+📈 Reporting & export (backlog)
+====================================================================
 - [ ] Processing summary report
 - [ ] Before / After comparison report
+- [ ] HTML report
+- [ ] CSV / JSON export
 
----
-
-## 📉 Charts
-
-- [ ] Bar Chart
-- [ ] Pie Chart
-- [ ] Line Chart
-- [x] Include charts in PDF reports
-
----
-
-## ⚙️ Automation
-
-- [ ] Processing profiles (Presets)
-- [ ] One-click automation
-- [x] Batch Processing (entire folder)
-- [ ] Command Line (CLI) support
-
----
-
-## 📁 Export
-
-- [ ] CSV Export
-- [ ] JSON Export
-- [ ] XML Export
-- [ ] PDF Export
-
----
-
-## 🖥️ Interface
-
-- [ ] Modern icons
-- [ ] Context (Right Click) menu
-- [ ] Status notifications
+====================================================================
+⚙️ Automation & technical (backlog)
+====================================================================
+- [ ] Processing profiles (presets) + one-click automation
+- [ ] Command line (CLI) support
 - [ ] Processing history
+- [ ] Unit test infrastructure, better logging and error reporting
 
----
-
-## 🛠️ Technical Improvements
-
-- [ ] Unit test infrastructure
-- [ ] Improved logging
-- [ ] Error reporting
-- [ ] Performance optimization
-
----
-
-# ⭐ v1.3.0 (Future)
-
-- [ ] Plugin system
-- [ ] Multi-language support
-- [ ] Excel Preview
-- [ ] Formula analysis
-- [ ] Cell formatting tools
-- [ ] Duplicate Finder window
-- [ ] AI-powered data analysis
-
----
-
-# 🎯 Priorities
-
-## 🔴 High Priority
-
-- [ ] Drag & Drop
-- [x] Batch Processing
-- [ ] Worksheet selection
-- [x] PDF Report
-
-## 🟠 Medium Priority
-
-- [ ] Processing Presets
-- [ ] Remember last folder
-- [ ] Processing history
-
-## 🟢 Low Priority
-
-- [ ] Dark Mode
-- [ ] JSON Export
-- [ ] HTML Report
-
----
-
-# 📌 Main Goal for v1.2
-
-Theme:
-
-"Process Multiple Excel Files with One Click"
-
-The primary objective of v1.2 is to introduce Batch Processing, allowing users to select a folder and automatically process every Excel file inside it with a single click.
+====================================================================
+⏸ Later
+====================================================================
+- (later) Light / Dark theme
+- (later) Plugin system, multi-language UI, Excel preview, formula analysis
