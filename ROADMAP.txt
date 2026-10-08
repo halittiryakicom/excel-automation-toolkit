@@ -1,5 +1,5 @@
 🚀 Excel Automation Toolkit — Roadmap
-Last updated: 2026-09-30 · Current release: v1.2.1 (Python / PySide6)
+Last updated: 2026-10-08 · Current release: v1.2.1 (Python / PySide6)
 
 Status: [x] done · [ ] planned · (later) = parked until the .NET version
 
@@ -19,6 +19,9 @@ Status: [x] done · [ ] planned · (later) = parked until the .NET version
 🔜 NEXT — v2.0: .NET version (planned in Oct 2026, week 3)
 ====================================================================
 Decision (2026-09-28): all portfolio projects move to .NET.
+Decision (2026-10-08): delivery model = WEB DEMO FIRST (try it from halittiryaki.com, AI key
+  stays on the server), then a DESKTOP INSTALL for customers who want to continue / keep data
+  on their own computer. Shared .NET core library so both front ends use the same logic.
 v2.0 = feature parity with v1.2.1 on .NET, plus the AI feature below.
 
 - [ ] Scope + estimate for the .NET port (UI framework choice, Excel library, PDF library)
