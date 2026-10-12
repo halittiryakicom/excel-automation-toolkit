@@ -1,5 +1,5 @@
 🚀 Excel Automation Toolkit — Roadmap
-Last updated: 2026-10-08 · Current release: v1.2.1 (Python / PySide6)
+Last updated: 2026-10-12 · Current release: v1.2.1 (Python / PySide6)
 
 Status: [x] done · [ ] planned · (later) = parked until the .NET version
 
@@ -24,7 +24,15 @@ Decision (2026-10-08): delivery model = WEB DEMO FIRST (try it from halittiryaki
   on their own computer. Shared .NET core library so both front ends use the same logic.
 v2.0 = feature parity with v1.2.1 on .NET, plus the AI feature below.
 
-- [ ] Scope + estimate for the .NET port (UI framework choice, Excel library, PDF library)
+- [x] Scope + stack decided (2026-10-12): .NET 10 LTS · Blazor Web App (demo) + WPF/Blazor Hybrid
+      (desktop, same Razor UI) · ClosedXML · QuestPDF · ScottPlot 5 · Anthropic C# SDK
+      Repo: v1 frozen as tag v1.2.1, .NET work on branch feat/dotnet-v2
+      Web demo: demo-excel.halittiryaki.com
+- [ ] M1 Core (open/clean/statistics/save + tests) ...... 16–24.10
+- [ ] M2 Web demo live on demo-excel.halittiryaki.com .. 26.10–03.11
+- [ ] M3 Charts + PDF report ............................ 04–10.11
+- [ ] M4 "Ask your Excel" (AI) .......................... 11–20.11
+- [ ] M5 Desktop (WPF + Blazor Hybrid) + installer + batch 21–30.11
 - [ ] Feature parity: open / clean / statistics / charts / batch / PDF report
 - [ ] Settings page
 - [ ] Worksheet selection
