@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>ExcelToolkit.Core</RootNamespace>
+    <Description>Excel Automation Toolkit v2 çekirdeği: dosya okuma, temizleme, istatistik.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.105.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ExcelToolkit.Core.Tests" />
+  </ItemGroup>
+
+</Project>
