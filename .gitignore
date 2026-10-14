@@ -39,3 +39,9 @@ output/
 
 # Jupyter
 .ipynb_checkpoints/
+# .NET (v2)
+bin/
+obj/
+.vs/
+*.user
+TestResults/
