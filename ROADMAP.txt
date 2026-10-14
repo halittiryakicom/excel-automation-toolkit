@@ -30,7 +30,7 @@ v2.0 = feature parity with v1.2.1 on .NET, plus the AI feature below.
       Web demo: demo-excel.halittiryaki.com
 - [~] M1 Core (open/clean/statistics/save + tests) ...... 16–24.10
       done 14.10 (branch feat/dotnet-v2, folder dotnet/): solution skeleton, read .xlsx/.csv,
-      remove empty/duplicate rows, xUnit tests incl. v1 parity (12 -> 9 rows) — dotnet test: 48/48 passed (.NET SDK 10.0.402)
+      remove empty/duplicate rows, xUnit tests incl. v1 parity (12 -> 9 rows) — dotnet test: 48/48 passed (.NET SDK 10.0.402) · pushed to GitHub 14.10
       next: statistics, save .xlsx, .xls via ExcelDataReader
 - [ ] M2 Web demo live on demo-excel.halittiryaki.com .. 26.10–03.11
 - [ ] M3 Charts + PDF report ............................ 04–10.11
