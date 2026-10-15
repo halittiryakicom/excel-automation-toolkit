@@ -28,10 +28,10 @@ v2.0 = feature parity with v1.2.1 on .NET, plus the AI feature below.
       (desktop, same Razor UI) · ClosedXML · QuestPDF · ScottPlot 5 · Anthropic C# SDK
       Repo: v1 frozen as tag v1.2.1, .NET work on branch feat/dotnet-v2
       Web demo: demo-excel.halittiryaki.com
-- [~] M1 Core (open/clean/statistics/save + tests) ...... 16–24.10
-      done 14.10 (branch feat/dotnet-v2, folder dotnet/): solution skeleton, read .xlsx/.csv,
-      remove empty/duplicate rows, xUnit tests incl. v1 parity (12 -> 9 rows) — dotnet test: 48/48 passed (.NET SDK 10.0.402) · pushed to GitHub 14.10
-      next: statistics, save .xlsx, .xls via ExcelDataReader
+- [x] M1 Core (open/clean/statistics/save + tests) ...... done 15.10 (target was 24.10)
+      branch feat/dotnet-v2, folder dotnet/: read .xlsx/.csv, remove empty/duplicate rows,
+      statistics (matches v1/pandas values), save .xlsx · dotnet test 61/61 passed
+      later (optional): .xls via ExcelDataReader
 - [ ] M2 Web demo live on demo-excel.halittiryaki.com .. 26.10–03.11
 - [ ] M3 Charts + PDF report ............................ 04–10.11
 - [ ] M4 "Ask your Excel" (AI) .......................... 11–20.11
