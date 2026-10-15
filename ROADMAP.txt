@@ -32,7 +32,7 @@ v2.0 = feature parity with v1.2.1 on .NET, plus the AI feature below.
       branch feat/dotnet-v2, folder dotnet/: read .xlsx/.csv, remove empty/duplicate rows,
       statistics (matches v1/pandas values), save .xlsx · dotnet test 61/61 passed
       later (optional): .xls via ExcelDataReader
-- [ ] M2 Web demo live on demo-excel.halittiryaki.com .. 26.10–03.11
+- [ ] M2 Web demo live on demo-excel.halittiryaki.com .. 16–30.10 (moved earlier, M1 done early)
 - [ ] M3 Charts + PDF report ............................ 04–10.11
 - [ ] M4 "Ask your Excel" (AI) .......................... 11–20.11
 - [ ] M5 Desktop (WPF + Blazor Hybrid) + installer + batch 21–30.11
