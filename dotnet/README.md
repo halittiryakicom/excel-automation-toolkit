@@ -16,7 +16,7 @@ dotnet test
 ```
 dotnet/
 ├─ ExcelToolkit.slnx
-├─ src/ExcelToolkit.Core          okuma (.xlsx, .csv) · temizleme (boş/tekrar satır)
+├─ src/ExcelToolkit.Core          okuma (.xlsx, .csv) · temizleme · istatistik · kaydetme (.xlsx)
 └─ tests/ExcelToolkit.Core.Tests  xUnit · v1 ile aynı sonuç testi (TestData/sample_employee_data.xlsx)
 ```
 
@@ -24,6 +24,6 @@ dotnet/
 - [x] Çözüm iskeleti, ortak ayarlar (`Directory.Build.props`, `global.json`)
 - [x] Okuma: `.xlsx` (ClosedXML, formüller çalıştırılmaz) · `.csv` (ayırıcı ve kodlama otomatik, Türkçe sayı/tarih) · `.xlsm` ve `.xls` reddedilir · satır sınırı
 - [x] Temizleme: boş satır + tekrar satır (v1 ile aynı sıra ve sonuç)
-- [ ] İstatistik (satır/sütun, sayısal/metin sütun, boş hücre, ortalama/toplam/min/maks/medyan/std)
-- [ ] Kaydetme (.xlsx)
+- [x] İstatistik: satır/sütun, sayısal/metin sütun, boş hücre, sütun türü; sayısal sütunlarda toplam/ortalama/min/maks/medyan/std (v1 ile aynı değerler)
+- [x] Kaydetme (.xlsx): kalın ve sabit başlık, filtre, sütun genişliği; "=" ile başlayan metin formül olmaz
 - [ ] `.xls` desteği (ExcelDataReader)
