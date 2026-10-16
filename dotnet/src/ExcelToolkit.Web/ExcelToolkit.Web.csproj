@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <RootNamespace>ExcelToolkit.Web</RootNamespace>
+    <Description>Excel Automation Toolkit v2 web demo (Blazor Web App, etkileşimli sunucu modu).</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ExcelToolkit.Core\ExcelToolkit.Core.csproj" />
+  </ItemGroup>
+
+</Project>
