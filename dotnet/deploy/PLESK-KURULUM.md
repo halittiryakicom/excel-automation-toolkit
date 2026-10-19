@@ -37,3 +37,4 @@ Yükleme: Plesk → alt alan adı → **Dosyalar** → belge kökü →
 | 400 "Bad Request – Invalid Hostname" | Adres `AllowedHosts` listesinde değil (`appsettings.Production.json`) |
 | Sayfa açılıyor ama düğmeler çalışmıyor | Blazor bağlantısı kurulamıyor → tarayıcı konsolu / WebSocket ayarı |
 | Sertifika uyarısı | Let's Encrypt alınmadan önce DNS yayılmamış → DNS'i bekle, sertifikayı yeniden al |
+| `ERR_CERT_COMMON_NAME_INVALID` (19.10'da yaşandı) | Alt alan adına başka adın sertifikası (ana alan adı / Plesk varsayılanı) sunuluyor → alt alan adı → SSL/TLS Sertifikaları → Let's Encrypt (`demo-excel.halittiryaki.com`) → **Barındırma Ayarları → Sertifika** listesinde bunu seç. halittiryaki.com HSTS `includeSubDomains; preload` gönderdiği için tarayıcı "yine de devam et" seçeneği **vermez**; geçerli sertifika şart. |
