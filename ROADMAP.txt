@@ -41,7 +41,7 @@ v2.0 = feature parity with v1.2.1 on .NET, plus the AI feature below.
 - [ ] M4 "Ask your Excel" (AI) .......................... 14–23.12
 - [ ] M5 Desktop (WPF + Blazor Hybrid) + installer + batch Jan 2027
       Learning track (portfolio / CV), alongside M2–M5:
-- [ ] CI: GitHub Actions build + test on every push ............ 24.10
+- [~] CI: GitHub Actions build + test on every push ............ workflow written 19.10 (moved from 24.10), green run after push
 - [ ] ExcelToolkit.Api: REST (clean, stats), validation, OpenAPI, JWT .. 31.10–21.11
 - [ ] Docker + docker-compose, runs on Linux server ............. 28.11–19.12
 - [ ] Microservices demo: upload API -> RabbitMQ (MassTransit) -> worker -> notification, YARP .. 04.01–14.02.2027

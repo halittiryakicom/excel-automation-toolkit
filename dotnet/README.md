@@ -3,6 +3,9 @@
 v1 (Python / PySide6) depo kökünde, `v1.2.1` etiketiyle donduruldu. v2 bu klasörde geliştiriliyor (dal `feat/dotnet-v2`).
 Plan: `halittiryakicom/Protocols/Planlar/HT-Excel-v2-NET-Plani.md`
 
+## CI
+Her push ve PR'da GitHub Actions derler ve testleri çalıştırır: `.github/workflows/dotnet.yml` (yalnız `dotnet/` değişince).
+
 ## Gerekenler
 - .NET 10 SDK (`dotnet --version` → 10.0.x)
 

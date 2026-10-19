@@ -1,0 +1,52 @@
+# v2 (.NET 10) için her push ve PR'da derleme + test.
+# v1 (Python) dosyaları değişince çalışmaz.
+name: .NET build & test
+
+on:
+  push:
+    branches: [main, "feat/**"]
+    paths: ["dotnet/**", ".github/workflows/dotnet.yml"]
+  pull_request:
+    paths: ["dotnet/**", ".github/workflows/dotnet.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dotnet-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: dotnet
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: dotnet/global.json
+
+      - name: Restore
+        run: dotnet restore ExcelToolkit.slnx
+
+      - name: Build
+        run: dotnet build ExcelToolkit.slnx -c Release --no-restore
+
+      - name: Test
+        run: dotnet test ExcelToolkit.slnx -c Release --no-build --logger "trx;LogFileName=results.trx" --results-directory TestResults
+
+      - name: Test sonuçlarını sakla
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: dotnet/TestResults
+          retention-days: 14
