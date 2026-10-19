@@ -31,9 +31,10 @@ Yükleme: Plesk → alt alan adı → **Dosyalar** → belge kökü →
 - Claude'a "excel demo yayında" yaz → canlı kontrol: `/healthz` = ok, örnek dosya yükle-temizle-indir, telefon görünümü, güvenlik başlıkları, WebSocket.
 
 ## Sorun çıkarsa
-| Belirti | Neden / çözüm |
+| Belirti | Neden / çözüm | 
 |---|---|
 | 500.30 / 502.5 | Runtime ya da uygulama başlamıyor → `web.config`'de `stdoutLogEnabled="true"` yap, `logs\` klasörünü oluştur, tekrar aç, logu Claude'a gönder (sonra kapat) |
+| 500.34 "does not support mixing hosting models" (19.10'da yaşandı) | Alt alan adı ana sitenin uygulama havuzunu paylaşıyor; ana site out-of-process. Çözüm: projede `AspNetCoreHostingModel=OutOfProcess` (yapıldı) → yeniden yayın. Alternatif: Plesk'te alt alan adına ayrı uygulama havuzu |
 | 400 "Bad Request – Invalid Hostname" | Adres `AllowedHosts` listesinde değil (`appsettings.Production.json`) |
 | Sayfa açılıyor ama düğmeler çalışmıyor | Blazor bağlantısı kurulamıyor → tarayıcı konsolu / WebSocket ayarı |
 | Sertifika uyarısı | Let's Encrypt alınmadan önce DNS yayılmamış → DNS'i bekle, sertifikayı yeniden al |

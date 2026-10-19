@@ -3,6 +3,9 @@
   <PropertyGroup>
     <RootNamespace>ExcelToolkit.Web</RootNamespace>
     <Description>Excel Automation Toolkit v2 web demo (Blazor Web App, etkileşimli sunucu modu).</Description>
+    <!-- Plesk: alt alan adı halittiryaki.com ile aynı IIS uygulama havuzunu paylaşıyor ve o site
+         out-of-process çalışıyor. Aynı havuzda iki model karışınca 500.34 verir (19.10). -->
+    <AspNetCoreHostingModel>OutOfProcess</AspNetCoreHostingModel>
   </PropertyGroup>
 
   <ItemGroup>
