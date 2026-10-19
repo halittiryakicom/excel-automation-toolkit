@@ -45,3 +45,7 @@ obj/
 .vs/
 *.user
 TestResults/
+
+# .NET v2 yayın çıktıları ve sunucu anahtarları
+dotnet/deploy/out/
+**/App_Data/
