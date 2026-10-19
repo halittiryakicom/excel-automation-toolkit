@@ -49,3 +49,6 @@ TestResults/
 # .NET v2 yayın çıktıları ve sunucu anahtarları
 dotnet/deploy/out/
 **/App_Data/
+
+# Test sonuçları
+dotnet/TestResults/
