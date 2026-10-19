@@ -37,5 +37,6 @@ dotnet/
 - [x] Özet kartları + sütun özeti tablosu + ilk 20 satır önizleme
 - [x] Temiz dosyayı .xlsx indir (sunucuda dosya tutulmaz)
 - [x] IP başına dakikada 30 istek sınırı
-- [ ] Plesk: demo-excel.halittiryaki.com alt alan adı + SSL + yayın
+- [x] Yayın hazırlığı (19.10): Plesk/IIS `web.config` (WebSocket, 12 MB istek sınırı) · `appsettings.Production.json` (izinli adres) · gerçek IP (forwarded headers) · anahtarlar `App_Data`'da · güvenlik başlıkları · `/healthz` · `deploy/Yayinla-ExcelDemo.ps1` + `deploy/PLESK-KURULUM.md`
+- [ ] Plesk: demo-excel.halittiryaki.com alt alan adı + SSL + ilk yayın (adımlar: `deploy/PLESK-KURULUM.md`)
 - [ ] Gizlilik/aydınlatma notu, halittiryaki.com'a bağlantı

@@ -34,10 +34,12 @@ v2.0 = feature parity with v1.2.1 on .NET, plus the AI feature below.
       later (optional): .xls via ExcelDataReader
 - [ ] M2 Web demo live on demo-excel.halittiryaki.com .. 16–30.10 (moved earlier, M1 done early)
       [x] 16.10 Blazor demo works locally: upload (10 MB, in memory) -> clean -> stats -> preview -> .xlsx download (69 tests)
-      [ ] Plesk subdomain + SSL + deploy
-- [ ] M3 Charts + PDF report ............................ 04–10.11
-- [ ] M4 "Ask your Excel" (AI) .......................... 11–20.11
-- [ ] M5 Desktop (WPF + Blazor Hybrid) + installer + batch 21–30.11
+      [x] 19.10 deploy prep: web.config (WebSocket, 12 MB), production AllowedHosts, forwarded headers,
+          data-protection keys in App_Data, security headers, /healthz, Yayinla-ExcelDemo.ps1 + PLESK-KURULUM.md
+      [ ] Plesk subdomain + SSL + first deploy (Halit, steps in dotnet/deploy/PLESK-KURULUM.md)
+- [ ] M3 Charts + PDF report ............................ 08–13.12 (moved 19.10: Kodding priority)
+- [ ] M4 "Ask your Excel" (AI) .......................... 14–23.12
+- [ ] M5 Desktop (WPF + Blazor Hybrid) + installer + batch Jan 2027
       Learning track (portfolio / CV), alongside M2–M5:
 - [ ] CI: GitHub Actions build + test on every push ............ 24.10
 - [ ] ExcelToolkit.Api: REST (clean, stats), validation, OpenAPI, JWT .. 31.10–21.11
