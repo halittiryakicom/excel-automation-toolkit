@@ -3,6 +3,7 @@ using System.Threading.RateLimiting;
 using ExcelToolkit.Web.Components;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.FileProviders;
 
 // Sayı ve tarih biçimi Türkçe (1.234,56 · 16.10.2026)
 var turkish = CultureInfo.GetCultureInfo("tr-TR");
@@ -63,6 +64,19 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
 }
+
+// Let's Encrypt (Plesk) doğrulaması: Plesk kontrol dosyasını sitenin kök klasöründe
+// .well-known/acme-challenge/ altına yazar; IIS her isteği bu uygulamaya verdiği için dosyayı
+// biz sunarız. HTTPS yönlendirmesinden ÖNCE: sertifika yokken de http üzerinden okunabilsin.
+var wellKnown = Path.Combine(app.Environment.ContentRootPath, ".well-known");
+Directory.CreateDirectory(Path.Combine(wellKnown, "acme-challenge"));
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(wellKnown),
+    RequestPath = "/.well-known",
+    ServeUnknownFileTypes = true,
+    DefaultContentType = "text/plain",
+});
 
 app.UseHttpsRedirection();
 app.UseRateLimiter();

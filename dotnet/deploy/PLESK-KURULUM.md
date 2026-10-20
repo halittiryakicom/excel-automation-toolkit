@@ -34,6 +34,7 @@ Yükleme: Plesk → alt alan adı → **Dosyalar** → belge kökü →
 | Belirti | Neden / çözüm | 
 |---|---|
 | 500.30 / 502.5 | Runtime ya da uygulama başlamıyor → `web.config`'de `stdoutLogEnabled="true"` yap, `logs\` klasörünü oluştur, tekrar aç, logu Claude'a gönder (sonra kapat) |
+| Let's Encrypt: "Timeout after connect" / 404 (HTTP doğrulama) veya "NXDOMAIN _acme-challenge" (DNS doğrulama) (20.10'da yaşandı) | HTTP: IIS her isteği uygulamaya veriyor → uygulama artık `/.well-known/` klasörünü kendisi sunuyor (Program.cs, HTTPS yönlendirmesinden önce) → yeniden yayın → Let's Encrypt **HTTP (http-01)** ile tekrar. DNS: alt alan adının TXT kaydı yetkili DNS'e düşmüyor → HTTP yöntemini kullan. Not: Let's Encrypt saatte en fazla 5 başarısız denemeye izin verir |
 | 500.34 "does not support mixing hosting models" (19.10'da yaşandı) | Alt alan adı ana sitenin uygulama havuzunu paylaşıyor; ana site out-of-process. Çözüm: projede `AspNetCoreHostingModel=OutOfProcess` (yapıldı) → yeniden yayın. Alternatif: Plesk'te alt alan adına ayrı uygulama havuzu |
 | 400 "Bad Request – Invalid Hostname" | Adres `AllowedHosts` listesinde değil (`appsettings.Production.json`) |
 | Sayfa açılıyor ama düğmeler çalışmıyor | Blazor bağlantısı kurulamıyor → tarayıcı konsolu / WebSocket ayarı |
