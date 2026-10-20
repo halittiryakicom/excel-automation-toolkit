@@ -69,14 +69,18 @@ if (!app.Environment.IsDevelopment())
 // .well-known/acme-challenge/ altına yazar; IIS her isteği bu uygulamaya verdiği için dosyayı
 // biz sunarız. HTTPS yönlendirmesinden ÖNCE: sertifika yokken de http üzerinden okunabilsin.
 var wellKnown = Path.Combine(app.Environment.ContentRootPath, ".well-known");
-Directory.CreateDirectory(Path.Combine(wellKnown, "acme-challenge"));
-app.UseStaticFiles(new StaticFileOptions
+try { Directory.CreateDirectory(Path.Combine(wellKnown, "acme-challenge")); }
+catch (Exception ex) { app.Logger.LogWarning(ex, ".well-known klasörü oluşturulamadı; Plesk oluşturunca sunulur"); }
+if (Directory.Exists(wellKnown))
 {
-    FileProvider = new PhysicalFileProvider(wellKnown),
-    RequestPath = "/.well-known",
-    ServeUnknownFileTypes = true,
-    DefaultContentType = "text/plain",
-});
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(wellKnown),
+        RequestPath = "/.well-known",
+        ServeUnknownFileTypes = true,
+        DefaultContentType = "text/plain",
+    });
+}
 
 app.UseHttpsRedirection();
 app.UseRateLimiter();
