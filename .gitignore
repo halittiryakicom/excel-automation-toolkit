@@ -52,3 +52,6 @@ dotnet/deploy/out/
 
 # Test sonuçları
 dotnet/TestResults/
+
+# Local user state (recent files list holds personal paths; app recreates it)
+config/recent_files.json
