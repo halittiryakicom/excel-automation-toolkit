@@ -1,0 +1,61 @@
+# Excel temizleme demosu (Blazor WebAssembly) → GitHub Pages → demo-excel.halittiryaki.com
+# Sunucu yok: dosyalar tarayıcıda işlenir. (21.10: alt alan adı ana siteyle aynı IIS havuzunu
+# paylaştığı için demo Plesk'ten çıkarıldı.)
+# İlk kurulum: Settings → Pages → Source: GitHub Actions · Custom domain: demo-excel.halittiryaki.com
+#              Settings → Environments → github-pages → Deployment branches: feat/dotnet-v2 + main ekli olmalı
+name: Demo → GitHub Pages
+
+on:
+  push:
+    branches: [main, feat/dotnet-v2]
+    paths:
+      - "dotnet/src/ExcelToolkit.Core/**"
+      - "dotnet/src/ExcelToolkit.Wasm/**"
+      - "dotnet/Directory.Build.props"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: dotnet/global.json
+
+      - name: Publish (WebAssembly)
+        run: dotnet publish dotnet/src/ExcelToolkit.Wasm/ExcelToolkit.Wasm.csproj -c Release -o out
+
+      - name: Tek sayfa uygulama için 404 → index
+        run: cp out/wwwroot/index.html out/wwwroot/404.html
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: out/wwwroot
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

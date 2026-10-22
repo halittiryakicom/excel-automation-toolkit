@@ -56,10 +56,33 @@ public static class XlsxSheetWriter
             ws.Row(1).Style.Font.Bold = true;
             ws.SheetView.FreezeRows(1);
             ws.Range(1, 1, sheet.RowCount + 1, sheet.ColumnCount).SetAutoFilter();
-            ws.Columns(1, sheet.ColumnCount).AdjustToContents(1, Math.Min(sheet.RowCount + 1, WidthSampleRows));
+            SetColumnWidths(ws, sheet);
         }
 
         workbook.SaveAs(output);
+    }
+
+    private static void SetColumnWidths(IXLWorksheet ws, SheetData sheet)
+    {
+        var lastRow = Math.Min(sheet.RowCount + 1, WidthSampleRows);
+        try
+        {
+            ws.Columns(1, sheet.ColumnCount).AdjustToContents(1, lastRow);
+        }
+        catch (Exception)
+        {
+            // Yazı tipi ölçümü yapılamayan ortamlar (ör. tarayıcıda WebAssembly): karakter sayısına göre yaklaşık genişlik
+            for (var c = 1; c <= sheet.ColumnCount; c++)
+            {
+                var longest = 0;
+                for (var r = 1; r <= lastRow; r++)
+                {
+                    longest = Math.Max(longest, ws.Cell(r, c).GetFormattedString().Length);
+                }
+
+                ws.Column(c).Width = Math.Clamp(longest + 2, 8, 60);
+            }
+        }
     }
 
     private static void SetValue(IXLCell cell, object? value)

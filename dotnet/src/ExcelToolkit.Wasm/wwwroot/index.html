@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Excel Temizleme Demosu · Excel Automation Toolkit</title>
+    <meta name="description" content="Excel ve CSV dosyanızdaki boş ve tekrar eden satırları temizleyin, sütun özetini görün. Dosyanız tarayıcınızda işlenir, sunucuya gönderilmez." />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <base href="/" />
+    <link rel="preload" id="webassembly" />
+    <link rel="stylesheet" href="app.css" />
+    <script type="importmap"></script>
+</head>
+
+<body>
+    <div id="app">
+        <div class="loading" role="status">
+            <strong>Demo yükleniyor…</strong>
+            <div class="bar"><span></span></div>
+            <span class="pct"></span>
+            <noscript>Bu demo için JavaScript açık olmalı.</noscript>
+        </div>
+    </div>
+
+    <div id="blazor-error-ui">
+        Beklenmeyen bir hata oluştu.
+        <a href="." class="reload">Sayfayı yenile</a>
+        <span class="dismiss">✕</span>
+    </div>
+
+    <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
+    <script src="js/download.js"></script>
+</body>
+
+</html>

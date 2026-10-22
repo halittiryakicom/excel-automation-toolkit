@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <PropertyGroup>
+    <RootNamespace>ExcelToolkit.Wasm</RootNamespace>
+    <Description>Excel Automation Toolkit v2 web demo — tarayıcıda çalışır (Blazor WebAssembly). Dosya sunucuya gitmez.</Description>
+    <!-- index.html'deki #[.{fingerprint}] yer tutucularını yayında doldurur (.NET 10 şablonu) -->
+    <OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>
+    <!-- tr-TR sayı/tarih biçimi için tüm kültür verisi yüklensin -->
+    <BlazorWebAssemblyLoadAllGlobalizationData>true</BlazorWebAssemblyLoadAllGlobalizationData>
+    <!-- ClosedXML / OpenXml yansıma kullanır: yalnız çerçeve kitaplıkları kırpılsın -->
+    <TrimMode>partial</TrimMode>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.0" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ExcelToolkit.Core\ExcelToolkit.Core.csproj" />
+  </ItemGroup>
+
+</Project>

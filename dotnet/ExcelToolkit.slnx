@@ -2,6 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/ExcelToolkit.Core/ExcelToolkit.Core.csproj" />
     <Project Path="src/ExcelToolkit.Web/ExcelToolkit.Web.csproj" />
+    <Project Path="src/ExcelToolkit.Wasm/ExcelToolkit.Wasm.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/ExcelToolkit.Core.Tests/ExcelToolkit.Core.Tests.csproj" />

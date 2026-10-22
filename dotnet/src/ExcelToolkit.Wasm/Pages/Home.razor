@@ -1,0 +1,270 @@
+@page "/"
+@implements IDisposable
+@using ExcelToolkit.Core.Cleaning
+@using ExcelToolkit.Core.Processing
+@using ExcelToolkit.Core.Reading
+@inject IJSRuntime JS
+@inject ILogger<Home> Logger
+
+<PageTitle>Excel Temizleme Demosu · Excel Automation Toolkit</PageTitle>
+
+<section class="intro">
+    <h1>Excel dosyanızı saniyeler içinde temizleyin</h1>
+    <p>
+        Boş ve tekrar eden satırları siler, her sütunun özetini çıkarır, temiz dosyayı indirmenizi sağlar.
+        <strong>.xlsx</strong> ve <strong>.csv</strong> · en fazla 10 MB · 50.000 satır.
+    </p>
+    <p class="note">Dosyanız <strong>bilgisayarınızdan çıkmaz</strong>: tüm işlem tarayıcınızda yapılır, hiçbir sunucuya gönderilmez.</p>
+</section>
+
+<section class="card">
+    <div class="options">
+        <label><input type="checkbox" @bind="removeEmpty" disabled="@busy" /> Boş satırları sil</label>
+        <label><input type="checkbox" @bind="removeDuplicates" disabled="@busy" /> Tekrar eden satırları sil</label>
+    </div>
+
+    <label class="upload @(busy ? "disabled" : null)">
+        <InputFile OnChange="OnFileSelectedAsync" accept=".xlsx,.csv" disabled="@busy" />
+        <span>@(busy ? "İşleniyor…" : "Dosya seçin (.xlsx / .csv)")</span>
+    </label>
+
+    @if (uploaded is not null && result is not null && !busy)
+    {
+        <button class="secondary" @onclick="ReprocessAsync">Seçeneklerle tekrar işle</button>
+    }
+
+    @if (error is not null)
+    {
+        <div class="alert" role="alert">@error</div>
+    }
+</section>
+
+@if (result is not null)
+{
+    var s = result.Cleaning;
+
+    <section class="summary">
+        <div class="stat"><span class="value">@s.OriginalRows.ToString("N0")</span><span class="label">Başlangıç satırı</span></div>
+        <div class="stat"><span class="value">@s.RemovedEmptyRows.ToString("N0")</span><span class="label">Silinen boş satır</span></div>
+        <div class="stat"><span class="value">@s.RemovedDuplicateRows.ToString("N0")</span><span class="label">Silinen tekrar satır</span></div>
+        <div class="stat highlight"><span class="value">@s.CurrentRows.ToString("N0")</span><span class="label">Temiz satır</span></div>
+        <div class="stat"><span class="value">@result.Before.EmptyCellCount.ToString("N0") → @result.After.EmptyCellCount.ToString("N0")</span><span class="label">Boş hücre</span></div>
+    </section>
+
+    <section class="card">
+        <div class="card-head">
+            <h2>@result.FileName — temiz tablo</h2>
+            <button class="primary" @onclick="DownloadAsync" disabled="@busy">Temiz dosyayı indir (.xlsx)</button>
+        </div>
+
+        <h3>Sütun özeti</h3>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Sütun</th><th>Tür</th><th>Dolu</th><th>Boş</th>
+                        <th>Toplam</th><th>Ortalama</th><th>En küçük</th><th>En büyük</th><th>Medyan</th><th>Std. sapma</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in result.After.Columns)
+                    {
+                        <tr>
+                            <td>@c.Name</td>
+                            <td>@CellDisplay.Kind(c.Kind)</td>
+                            <td class="num">@c.FilledCount.ToString("N0")</td>
+                            <td class="num">@c.EmptyCount.ToString("N0")</td>
+                            <td class="num">@CellDisplay.Number(c.Numeric?.Sum)</td>
+                            <td class="num">@CellDisplay.Number(c.Numeric?.Mean)</td>
+                            <td class="num">@CellDisplay.Number(c.Numeric?.Min)</td>
+                            <td class="num">@CellDisplay.Number(c.Numeric?.Max)</td>
+                            <td class="num">@CellDisplay.Number(c.Numeric?.Median)</td>
+                            <td class="num">@CellDisplay.Number(c.Numeric?.StandardDeviation)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <h3>İlk @Math.Min(PreviewRows, result.Cleaned.RowCount) satır</h3>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        @foreach (var column in result.Cleaned.Columns)
+                        {
+                            <th>@column</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in result.Cleaned.Rows.Take(PreviewRows))
+                    {
+                        <tr>
+                            @foreach (var cell in row)
+                            {
+                                <td class="@(cell is double ? "num" : null)">@CellDisplay.Format(cell)</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+}
+
+@code {
+    private const int PreviewRows = 20;
+    private static readonly TimeSpan KeepFor = TimeSpan.FromMinutes(30);
+
+    private bool removeEmpty = true;
+    private bool removeDuplicates = true;
+    private bool busy;
+    private string? error;
+
+    // Yüklenen dosya ve sonuç sadece bu sekmenin belleğinde durur; 30 dk sonra ya da sekme kapanınca silinir.
+    private byte[]? uploaded;
+    private string? uploadedName;
+    private ProcessResult? result;
+    private Timer? clearTimer;
+
+    private async Task OnFileSelectedAsync(InputFileChangeEventArgs e)
+    {
+        error = null;
+        var file = e.File;
+
+        if (file.Size > WorkbookProcessor.MaxFileSizeBytes)
+        {
+            error = $"Dosya {file.Size / 1024d / 1024d:N1} MB. En fazla 10 MB yüklenebilir.";
+            return;
+        }
+
+        busy = true;
+        await RenderBusyAsync();
+        try
+        {
+            await using var input = file.OpenReadStream(WorkbookProcessor.MaxFileSizeBytes);
+            using var buffer = new MemoryStream();
+            await input.CopyToAsync(buffer);
+
+            uploaded = buffer.ToArray();
+            uploadedName = file.Name;
+            await RunAsync();
+        }
+        catch (IOException ex)
+        {
+            Logger.LogWarning(ex, "Dosya yüklenemedi");
+            error = "Dosya okunamadı. Tekrar deneyin.";
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task ReprocessAsync()
+    {
+        busy = true;
+        await RenderBusyAsync();
+        try
+        {
+            await RunAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task RunAsync()
+    {
+        if (uploaded is null || uploadedName is null)
+        {
+            return;
+        }
+
+        error = null;
+        var options = new CleaningOptions { RemoveEmptyRows = removeEmpty, RemoveDuplicateRows = removeDuplicates };
+
+        try
+        {
+            var bytes = uploaded;
+            var name = uploadedName;
+            result = await Task.Run(() =>
+            {
+                using var stream = new MemoryStream(bytes, writable: false);
+                return WorkbookProcessor.Process(stream, name, options);
+            });
+            ScheduleClear();
+        }
+        catch (FileReadException ex)
+        {
+            // Mesajlar Türkçe ve kullanıcıya gösterilebilir (desteklenmeyen tür, satır sınırı, bozuk dosya…)
+            result = null;
+            error = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Dosya işlenemedi: {FileName}", uploadedName);
+            result = null;
+            error = "Dosya işlenemedi. Dosyanın bozuk olmadığından emin olun ya da başka bir dosya deneyin.";
+        }
+    }
+
+    private async Task DownloadAsync()
+    {
+        if (result is null)
+        {
+            return;
+        }
+
+        busy = true;
+        await RenderBusyAsync();
+        try
+        {
+            var bytes = await Task.Run(() => WorkbookProcessor.ToXlsx(result.Cleaned));
+            using var streamRef = new DotNetStreamReference(new MemoryStream(bytes));
+            await JS.InvokeVoidAsync("downloadFileFromStream", WorkbookProcessor.OutputFileName(result.FileName), streamRef);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "İndirme hazırlanamadı");
+            error = "İndirme hazırlanamadı. Tekrar deneyin.";
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    // Tarayıcıda tek iş parçacığı var: "İşleniyor…" yazısı görünsün diye önce ekranı çiz, sonra işle.
+    private async Task RenderBusyAsync()
+    {
+        StateHasChanged();
+        await Task.Delay(30);
+    }
+
+    private void ScheduleClear()
+    {
+        clearTimer?.Dispose();
+        clearTimer = new Timer(_ => InvokeAsync(() =>
+        {
+            ClearData();
+            error = "Güvenlik için dosyanız 30 dakika sonra bellekten silindi. Tekrar seçebilirsiniz.";
+            StateHasChanged();
+        }), null, KeepFor, Timeout.InfiniteTimeSpan);
+    }
+
+    private void ClearData()
+    {
+        uploaded = null;
+        uploadedName = null;
+        result = null;
+    }
+
+    public void Dispose()
+    {
+        clearTimer?.Dispose();
+        ClearData();
+    }
+}
